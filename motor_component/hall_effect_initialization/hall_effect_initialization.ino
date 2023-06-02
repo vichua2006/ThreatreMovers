@@ -24,10 +24,18 @@ void setup() {
 }
 
 void loop() {
-
-  pan_init();
-  delay(1000);
-
+  String line = "";
+ if (Serial.available()) {
+    while (Serial.available()) {
+      char c = Serial.read();  // Read the next character
+      if (c == '\n' || c == '\r') {
+        Serial.println(line);
+        line = "";
+        break;
+      }
+      line += c;
+    }
+  }
 }
 
 // calibrates pan motor to 0 degrees 
