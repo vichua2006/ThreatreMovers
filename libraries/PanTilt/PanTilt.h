@@ -10,7 +10,7 @@
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-class Motor {
+class StepperMotor {
   public:
 
     String MOTOR_NAME;
@@ -18,16 +18,32 @@ class Motor {
     int STEP_PIN, DIR_PIN, HALL_PIN, EEPROM_ADDRESS;
     double GEAR_RATIO, CURR_POSITION; // position in degrees
 
-    Motor(String name,
-          int steps, int step_pin, int dir_pin, 
-          int hall_pin, int eeprom_address, 
-          double gr); // constructor function
+    StepperMotor(String name,
+          StepperPin PinObj,
+          StepperProperty PropObj); // constructor function
 
     void init_pin_mode();
     void init_pos();
     void turn(double deg, bool dir, double time);
     void turn_to(double angular_position, double time);
     int deg_to_step(double deg);
+};
+
+class StepperPin {
+  public:
+
+    int STEP_PIN, DIR_PIN, HALL_PIN, EEPROM_ADDRESS;
+    
+    StepperPin(int step, int dir, int hall, int eeprom_add);
+};
+
+class StepperProperty{
+  public:
+
+    int STEPS;
+    double GEAR_RATIO;
+
+    StepperProperty(int steps, double gr);
 };
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
