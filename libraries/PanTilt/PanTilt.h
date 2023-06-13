@@ -1,5 +1,4 @@
 /* header file for pan tilt mechanism
- * variables and functions are only delcared; they are defined in sources file
  * Created by: Victor Huang
  * May 16, 2023
  */
@@ -8,7 +7,29 @@
 
 #include "Arduino.h"
 
+// header needs to be kept in so that arduino-cli does not automatically delete path from c_cpp_properties.json
+#include <ArduinoSTL.h>
+#include <cstdarg>
+#include <vector>
+
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+class StepperProperty{
+  public:
+
+    int STEPS;
+    double GEAR_RATIO;
+
+    StepperProperty(int steps, double gr);
+};
+
+class StepperPins {
+  public:
+
+    int STEP_PIN, DIR_PIN, HALL_PIN, EEPROM_ADDRESS;
+    
+    StepperPins(int step, int dir, int hall, int eeprom_add);
+};
 
 class StepperMotor {
   public:
@@ -19,7 +40,7 @@ class StepperMotor {
     double GEAR_RATIO, CURR_POSITION; // position in degrees
 
     StepperMotor(String name,
-          StepperPin PinObj,
+          StepperPins PinObj,
           StepperProperty PropObj); // constructor function
 
     void init_pin_mode();
@@ -29,21 +50,15 @@ class StepperMotor {
     int deg_to_step(double deg);
 };
 
-class StepperPin {
+class MultiStepper {
   public:
 
-    int STEP_PIN, DIR_PIN, HALL_PIN, EEPROM_ADDRESS;
-    
-    StepperPin(int step, int dir, int hall, int eeprom_add);
-};
+    std:: vector<StepperMotor> steppers;
 
-class StepperProperty{
-  public:
+    // const char* is a 
+    MultiStepper(const char* fmt, ...){
 
-    int STEPS;
-    double GEAR_RATIO;
-
-    StepperProperty(int steps, double gr);
+    }
 };
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/

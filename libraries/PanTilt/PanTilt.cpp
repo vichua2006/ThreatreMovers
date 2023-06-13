@@ -2,6 +2,13 @@
 #include "PanTilt.h"
 #include <EEPROM.h>
 
+
+// min/max need to be redefined as StandardCplusplus/ArduinoSTL undef'ed them
+// this is copied from the arduino definition of min/max
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
+
+
 const int PanSteps = 200;
 const int PanStepPin = 2;
 const int PanDirPin = 5;
@@ -25,15 +32,15 @@ String INPUT_STRING;
 double INPUT_POS;
 
 // create global stepper instances
-StepperPin PanPins(PanStepPin, PanDirPin, PanHallPin, PanAddress);
+StepperPins PanPins(PanStepPin, PanDirPin, PanHallPin, PanAddress);
 StepperProperty PanProp(PanSteps, PanGR);
 StepperMotor pan("Pan stepper", PanPins, PanProp);
 
-StepperPin TiltPins(TiltStepPin, TiltDirPin, TiltHallPin, TiltAddress);
+StepperPins TiltPins(TiltStepPin, TiltDirPin, TiltHallPin, TiltAddress);
 StepperProperty TiltProp(TiltSteps, TiltGR);
 StepperMotor tilt("Tilt stepper", TiltPins, TiltProp);
 
-StepperPin:: StepperPin(int step, int dir, int hall, int eeprom_add){
+StepperPins:: StepperPins(int step, int dir, int hall, int eeprom_add){
   STEP_PIN = step;
   DIR_PIN = dir;
   HALL_PIN = hall;
@@ -46,7 +53,7 @@ StepperProperty:: StepperProperty(int steps, double gr){
 }
 
 StepperMotor:: StepperMotor(String name,
-              StepperPin PinObj,
+              StepperPins PinObj,
               StepperProperty PropObj){
 
   MOTOR_NAME = name;
@@ -141,6 +148,7 @@ void mainLoop(){
     pan.turn_to(INPUT_POS, 0.7);
     tilt.turn_to(INPUT_POS, 0.2);
   }
+
 
 }
 
