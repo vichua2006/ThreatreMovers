@@ -1,3 +1,8 @@
+/* source file for pan tilt mechanism
+ * Created by: Victor Huang
+ * May 16, 2023
+ */
+
 #include "Arduino.h"
 #include "PanTilt.h"
 #include <EEPROM.h>
@@ -26,7 +31,8 @@ const double TiltGR = 64 / 21;
 const int MotorEnablePin = 8;// enable pins for motor (cnc shield); must be at low
 const int PotPin = A0;
 
-const int MinStepperDelay = 1000;
+const int MinStepperDelay = 0;
+const int FixedStepperDelay = 500;
 
 String INPUT_STRING;
 double INPUT_POS;
@@ -39,6 +45,8 @@ StepperMotor pan("Pan stepper", PanPins, PanProp);
 StepperPins TiltPins(TiltStepPin, TiltDirPin, TiltHallPin, TiltAddress);
 StepperProperty TiltProp(TiltSteps, TiltGR);
 StepperMotor tilt("Tilt stepper", TiltPins, TiltProp);
+
+/*---------------------------------------------------------------------class constructors---------------------------------------------------------------------------------*/
 
 StepperPins:: StepperPins(int step, int dir, int hall, int eeprom_add){
   STEP_PIN = step;
@@ -53,9 +61,8 @@ StepperProperty:: StepperProperty(int steps, double gr){
 }
 
 StepperMotor:: StepperMotor(String name,
-              StepperPins PinObj,
-              StepperProperty PropObj){
-
+                            StepperPins PinObj,
+                            StepperProperty PropObj){
   MOTOR_NAME = name;
   STEPS = PropObj.STEPS;
   GEAR_RATIO = PropObj.GEAR_RATIO;
@@ -64,10 +71,12 @@ StepperMotor:: StepperMotor(String name,
   HALL_PIN = PinObj.HALL_PIN;
 
   // CURR_POSITION = EEPROM.read(eeprom_address); // initalizes position by reading it from EEPROM: https://docs.arduino.cc/learn/built-in-libraries/eeprom
-  // if (CURR_POSITION > 180) CURR_POSITION = 0; // zero by default
 
-  CURR_POSITION = 0;
+  CURR_POSITION = 0; // zero by default
 }
+
+/*-----------------------------------------------------------------------class methods-------------------------------------------------------------------------------*/
+
 
 void StepperMotor:: init_pin_mode(){
   pinMode(STEP_PIN, OUTPUT);
@@ -76,13 +85,13 @@ void StepperMotor:: init_pin_mode(){
 }
 
 // turns the motors some degrees in specified direction within specified time; timing far from exact, only use as reference
-void StepperMotor:: turn(double deg, bool dir, double time){
+void StepperMotor:: turn(double deg, bool dir, int delay){
   if (deg < 1e-3) return ; // exit function if motor doesn't need to turn
 
   int driver_inc = deg * GEAR_RATIO * (double) STEPS / 360.0;
   // calculate delay
 
-  int delay_per_step = max((time / driver_inc * 5e5), MinStepperDelay);
+  int delay_per_step = max(delay, MinStepperDelay);
   // delay per step in microseconds; 1 second = 1e6 microseconds, then divide by 2 since there are two delays to get 5e5
   // 500 microseconds is pretty much the limit; anything faster the motor doesn't pick up
 
@@ -99,7 +108,7 @@ void StepperMotor:: turn(double deg, bool dir, double time){
 }
 
 // turns the motor to some absolute angular position
-void StepperMotor:: turn_to(double angular_position, double time=1){
+void StepperMotor:: turn_to(double angular_position, int delay = FixedStepperDelay){
   if (angular_position < 0 || angular_position > 180){
     Serial.println("OUTSIDE RANGE OF MOTION");
     return ;
@@ -108,7 +117,7 @@ void StepperMotor:: turn_to(double angular_position, double time=1){
   bool dir = (angular_position >= CURR_POSITION ? 1 : 0); // 1 is cw, 0 ccw
   double deg_difference = abs(angular_position - CURR_POSITION);
 
-  this->turn(deg_difference, dir, time);// turn motor
+  this->turn(deg_difference, dir, delay);// turn motor
   CURR_POSITION = angular_position;
 
   Serial.println("Motor " + MOTOR_NAME + " at position " + CURR_POSITION); // debugging
@@ -124,6 +133,9 @@ int StepperMotor:: deg_to_step(double deg){
   return (deg * GEAR_RATIO / 360.0) * STEPS;
 }
 
+/*--------------------------------------------------------------------general functions----------------------------------------------------------------------------------*/
+
+
 void initPanTilt(){
   
   // enable pins for motor (cnc shield); must be at low
@@ -137,10 +149,7 @@ void initPanTilt(){
 
 }
 
-double readSerialInput();
-
-void mainLoop(){
-
+double readSerialInput(){
   if (Serial.available()){
     INPUT_STRING = Serial.readStringUntil('\n');
     INPUT_POS = INPUT_STRING.toDouble();
@@ -149,6 +158,13 @@ void mainLoop(){
     tilt.turn_to(INPUT_POS, 0.2);
   }
 
+}
 
+void mainLoop(){
+
+  int pot_val = analogRead(A0);
+
+  double angle = map(pot_val, 0, 1023, 0, 180);
+  pan.turn_to(angle);
 }
 

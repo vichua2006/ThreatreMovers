@@ -40,13 +40,13 @@ class StepperMotor {
     double GEAR_RATIO, CURR_POSITION; // position in degrees
 
     StepperMotor(String name,
-          StepperPins PinObj,
-          StepperProperty PropObj); // constructor function
+                 StepperPins PinObj,
+                 StepperProperty PropObj); // constructor function
 
     void init_pin_mode();
     void init_pos();
-    void turn(double deg, bool dir, double time);
-    void turn_to(double angular_position, double time);
+    void turn(double deg, bool dir, int delay);
+    void turn_to(double angular_position, int delay);
     int deg_to_step(double deg);
 };
 
@@ -55,10 +55,8 @@ class MultiStepper {
 
     std:: vector<StepperMotor> steppers;
 
-    // const char* is a 
-    MultiStepper(const char* fmt, ...){
+    MultiStepper(std:: vector<StepperMotor> v);
 
-    }
 };
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
