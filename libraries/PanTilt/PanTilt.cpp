@@ -3,7 +3,6 @@
  * May 16, 2023
  */
 
-#include "Arduino.h"
 #include "PanTilt.h"
 #include <EEPROM.h>
 

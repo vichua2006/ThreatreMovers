@@ -1,5 +1,0 @@
-{
-    "board": "arduino:avr:uno",
-    "sketch": "PanTilt.ino",
-    "port": "COM7"
-}

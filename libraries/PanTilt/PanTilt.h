@@ -5,12 +5,12 @@
 #ifndef PanTilt_h
 #define PanTilt_h
 
-#include "Arduino.h"
+#include <Arduino.h>
 
-// header needs to be kept in so that arduino-cli does not automatically delete path from c_cpp_properties.json
-#include <ArduinoSTL.h>
-#include <cstdarg>
-#include <vector>
+// // header needs to be kept in so that arduino-cli does not automatically delete path from c_cpp_properties.json
+// #include <ArduinoSTL.h>
+// #include <cstdarg>
+// #include <vector>
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -42,6 +42,8 @@ class StepperMotor {
     StepperMotor(String name,
                  StepperPins PinObj,
                  StepperProperty PropObj); // constructor function
+    
+    StepperMotor() = default;
 
     void init_pin_mode();
     void init_pos();
@@ -50,13 +52,14 @@ class StepperMotor {
     int deg_to_step(double deg);
 };
 
-class MultiStepper {
+class DualStepper {
   public:
 
-    std:: vector<StepperMotor> steppers;
+    StepperMotor stepper1, stepper2;
 
-    MultiStepper(std:: vector<StepperMotor> v);
+    DualStepper(StepperMotor s1, StepperMotor s2);
 
+    void turn_to(double angle1, double angle2);
 };
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
