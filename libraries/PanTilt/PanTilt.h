@@ -19,8 +19,9 @@ class StepperProperty{
 
     int STEPS;
     double GEAR_RATIO;
+    double UPPER_BOUND, LOWER_BOUND;
 
-    StepperProperty(int steps, double gr);
+    StepperProperty(int steps, double gr, double upper, double lower);
 };
 
 class StepperPins {
@@ -37,7 +38,9 @@ class StepperMotor {
     String MOTOR_NAME;
     int STEPS;
     int STEP_PIN, DIR_PIN, HALL_PIN, EEPROM_ADDRESS;
-    double GEAR_RATIO, CURR_POSITION; // position in degrees
+    double GEAR_RATIO, CURR_POSITION;
+    double UPPER_BOUND, LOWER_BOUND; // bounds on absolute position
+    double STEPS_PER_DEGREE, DEGREES_PER_STEP;
 
     StepperMotor(String name,
                  StepperPins PinObj,
@@ -49,7 +52,10 @@ class StepperMotor {
     void init_pos();
     void turn(double deg, bool dir, int delay);
     void turn_to(double angular_position, int delay);
+    void step(int delay);
+
     int deg_to_step(double deg);
+    double step_to_deg(int inc);
 };
 
 class DualStepper {
@@ -57,7 +63,7 @@ class DualStepper {
 
     StepperMotor stepper1, stepper2;
 
-    DualStepper(StepperMotor s1, StepperMotor s2);
+    DualStepper(const StepperMotor& s1, const StepperMotor& s2);
 
     void turn_to(double angle1, double angle2);
 };
@@ -66,6 +72,7 @@ class DualStepper {
 
 void initPanTilt();
 void mainLoop();
+
 
 double readSerialInput();
 
