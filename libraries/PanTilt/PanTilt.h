@@ -7,10 +7,8 @@
 
 #include <Arduino.h>
 
-// // header needs to be kept in so that arduino-cli does not automatically delete path from c_cpp_properties.json
+// header needs to be kept in so that arduino-cli does not automatically delete path from c_cpp_properties.json
 // #include <ArduinoSTL.h>
-// #include <cstdarg>
-// #include <vector>
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
@@ -38,7 +36,7 @@ class StepperMotor {
     String MOTOR_NAME;
     int STEPS;
     int STEP_PIN, DIR_PIN, HALL_PIN, EEPROM_ADDRESS;
-    double GEAR_RATIO, CURR_POSITION;
+    double GEAR_RATIO, CURR_POSITION; // current absolute position
     double UPPER_BOUND, LOWER_BOUND; // bounds on absolute position
     double STEPS_PER_DEGREE, DEGREES_PER_STEP;
 
@@ -50,12 +48,18 @@ class StepperMotor {
 
     void init_pin_mode();
     void init_pos();
+
     void turn(double deg, bool dir, int delay);
-    void turn_to(double angular_position, int delay);
+    void turn_to(double position, int delay);
     void step(int delay);
 
+    bool out_of_bounds(double position);
+
     int deg_to_step(double deg);
+
     double step_to_deg(int inc);
+    double min_angle_difference(double new_position);
+    double get_position();
 };
 
 class DualStepper {
