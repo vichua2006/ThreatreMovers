@@ -52,6 +52,8 @@ StepperMotor tilt("Tilt stepper", TiltPins, TiltProp);
 
 DualStepper pan_tilt(pan, tilt, 360);
 
+DualHallSensors pan_tilt_sensors(PanHallPin, TiltHallPin);
+
 /*---------------------------------------------------------------------class constructors---------------------------------------------------------------------------------*/
 
 StepperPins:: StepperPins(int step, int dir, int hall, int eeprom_add){
@@ -194,6 +196,14 @@ void StepperMotor:: set_direction(bool dir){
   else digitalWrite(DIR_PIN, LOW); // ccw
 }
 
+// bad implementation; fix later
+void StepperMotor:: home(bool& homingSwitch){
+  set_direction(1);
+  while (!homingSwitch){
+    step();
+  }
+}
+
 bool StepperMotor:: out_of_bounds(double position){
   return position < LOWER_BOUND || position > UPPER_BOUND;
 }
@@ -241,12 +251,6 @@ String StepperMotor:: get_name(){
   return MOTOR_NAME;
 }
 
-void StepperMotor:: home(bool& homingSwitch){
-  set_direction(1);
-  while (!homingSwitch){
-    step();
-  }
-}
 
 void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int delay){
   // ugly code; will optimise later

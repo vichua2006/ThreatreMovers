@@ -102,11 +102,11 @@ class DualHallSensors{
     
     HallSensor panHall;
     HallSensor tiltHall;
-    
-    void pan_hall_fallingISR();
-    void pan_hall_risingISR();
-    void tilt_hall_fallingISR();
-    void tilt_hall_risingISR();
+
+    static void pan_hall_fallingISR();
+    static void pan_hall_risingISR();
+    static void tilt_hall_fallingISR();
+    static void tilt_hall_risingISR();
 
   // Methods to be used by user.
   public:
@@ -115,8 +115,9 @@ class DualHallSensors{
     int readPanHall();
     int readTiltHall();
     // Use below interrupt variables to check state of hall effects.
-    bool isPanHallClosed;
-    bool isTiltHallClosed;
+    
+    static bool isPanHallClosed;
+    static bool isTiltHallClosed;
 };
 
 
