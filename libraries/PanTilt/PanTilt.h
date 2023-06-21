@@ -76,8 +76,8 @@ class DualStepper {
 
     DualStepper(StepperMotor &s1, StepperMotor &s2, int seg);
 
-    void turn_to1(double pos1, double pos2, int delay);
-    void turn_to2(double pos1, double pos2, int delay);
+    void turn(double deg1, double deg2, bool dir1, bool dir2, int delay); // bad implementation
+    void turn_to(double pos1, double pos2, int delay);
 };
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/

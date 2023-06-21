@@ -225,9 +225,61 @@ String StepperMotor:: get_name(){
   return MOTOR_NAME;
 }
 
+void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int delay){
+  // ugly code; will optimise later
+  // basically StepperMotor:: turn(), but for two steppers instead
+
+  StepperMotor &ts1 = stepper1, &ts2 = stepper2;
+
+  double unsigned_difference1 = abs(deg1);
+  double unsigned_difference2 = abs(deg2);
+
+  int inc1 = ts1.deg_to_step(unsigned_difference1);
+  int inc2 = ts2.deg_to_step(unsigned_difference2);
+
+  int delay_per_step = max(delay, MinStepperDelay); 
+
+  ts1.set_direction(dir1);
+  ts2.set_direction(dir2);
+
+  if (inc1 < inc2){
+    int tinc = inc1;
+    inc1 = inc2;
+    inc2 = tinc;
+
+    StepperMotor &ts = ts1;
+    ts1 = ts2;
+    ts2 = ts;
+  }
+
+  for (int i=0,j=0;i<inc1;i++){
+    digitalWrite(ts1.STEP_PIN, HIGH);
+    if (i >= (int) j * inc1 / inc2){
+      digitalWrite(ts2.STEP_PIN, HIGH);
+      j ++ ;
+    }
+    delayMicroseconds(delay_per_step);
+    digitalWrite(PanStepPin, LOW);
+    digitalWrite(TiltStepPin, LOW); 
+    delayMicroseconds(delay_per_step);
+  }
+
+  double angular_displacement1 = ts1.step_to_deg(inc1);
+  double angular_displacement2 = ts2.step_to_deg(inc2);
+
+  // if direction is ccw
+  if (dir1 == 0) angular_displacement1 = -angular_displacement1;
+  if (dir2 == 0) angular_displacement2 = -angular_displacement2;
+
+  ts1.set_position(ts1.get_position() + angular_displacement1);
+  ts2.set_position(ts2.get_position() + angular_displacement2);
+
+  Serial.println(stepper1.get_name() + " at position " + stepper1.get_position()); // debugging
+  Serial.println(stepper2.get_name() + " at position " + stepper2.get_position());
+}
+
 // turn both steppers simultaneously
-// version 1 is implemented with use of StepperMotor:: turn()
-void DualStepper:: turn_to1(double pos1, double pos2, int delay = FixedStepperDelay){
+void DualStepper:: turn_to(double pos1, double pos2, int delay = FixedStepperDelay){
   // checks for boundary
   if (stepper1.out_of_bounds(pos1) || stepper2.out_of_bounds(pos2)){
     String msg = "";
@@ -246,20 +298,7 @@ void DualStepper:: turn_to1(double pos1, double pos2, int delay = FixedStepperDe
   double deg_diff2 = stepper2.min_angle_difference(pos2);
   bool dir2 = (deg_diff2 > 0 ? 1 : 0);
 
-  // compute the angle for each segment of the turns
-  double ang_per_seg1 = deg_diff1 / TURN_SEGMENTS;
-  double ang_per_seg2 = deg_diff2 / TURN_SEGMENTS;
-
-  double reference_pos1 = stepper1.get_position();
-  double reference_pos2 = stepper2.get_position();
-
-  for (int i=0;i<TURN_SEGMENTS;i++){
-    reference_pos1 += ang_per_seg1;
-    reference_pos2 += ang_per_seg2;
-
-    stepper1.turn_to(reference_pos1);
-    stepper2.turn_to(reference_pos2);
-  }
+  this->turn(deg_diff1, deg_diff2, dir1, dir2, delay);
 }
 
 /*--------------------------------------------------------------------general functions----------------------------------------------------------------------------------*/
@@ -284,13 +323,11 @@ double readSerialInput(){
 }
 
 void mainLoop(){
-
   if (Serial.available()){
     INPUT_STRING = Serial.readStringUntil('\n');
     INPUT_POS = INPUT_STRING.toDouble();
 
-    pan_tilt.turn_to1(INPUT_POS, INPUT_POS);
+    pan_tilt.turn_to(INPUT_POS, INPUT_POS / 4);
   }
-
 }
 
