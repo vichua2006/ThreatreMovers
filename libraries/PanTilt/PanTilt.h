@@ -1,7 +1,13 @@
 /* header file for pan tilt mechanism
- * Created by: Victor Huang
+ * Created by: Victor Huang and Rohan Katreddy
  * May 16, 2023
  */
+
+/* Change log
+ * 2023-06-21:
+ *     Added Hall sensor funcitionality and homing function.
+ */
+
 #ifndef PanTilt_h
 #define PanTilt_h
 
@@ -54,6 +60,7 @@ class StepperMotor {
     void step(int delay);
     void set_position(double position);
     void set_direction(bool dir);
+    void home(bool& homingSwitch);
 
     bool out_of_bounds(double position);
 
@@ -62,9 +69,36 @@ class StepperMotor {
     double step_to_deg(int inc);
     double min_angle_difference(double new_position);
     double get_position();
-
+  
     String get_name();
 };
+
+class GimbalHallSensors{
+  // Private class to be used by parent class.
+  Private:
+    class HallSensor{
+      public:
+        HallSensor(int pin);
+        int read();
+      private:
+        int pin;
+    };
+    HallSensor panHall;
+    HallSensor tiltHall;
+    void panHallFallingISR();
+    void panHallRisingISR();
+    void tiltHallFallingISR();
+    void tiltHallRisingISR();
+  // Methods to be used by user.
+  public:
+    GimbalHallSensors(int panHallPin, int tiltHallPin);
+    // Refrain from functions as interrupt variables are prefered.
+    int readPanHall();
+    int readTiltHall();
+    // Use below interrupt variables to check state of hall effects.
+    bool isPanHallClosed;
+    bool isTiltHallClosed;
+}
 
 class DualStepper {
   public:
@@ -78,7 +112,9 @@ class DualStepper {
 
     void turn(double deg1, double deg2, bool dir1, bool dir2, int delay); // bad implementation
     void turn_to(double pos1, double pos2, int delay);
+    void home(GimbalHallSensors hallSensors);
 };
+
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
 

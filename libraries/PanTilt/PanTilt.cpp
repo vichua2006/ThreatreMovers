@@ -1,5 +1,5 @@
 /* source file for pan tilt mechanism
- * Created by: Victor Huang
+ * Created by: Victor Huang and Rohan Katreddy
  * May 16, 2023
  */
 
@@ -96,6 +96,20 @@ DualStepper:: DualStepper(StepperMotor &s1, StepperMotor &s2, int seg = PanTiltS
   // on member initalizer list: https://stackoverflow.com/questions/1711990/what-is-this-weird-colon-member-syntax-in-the-constructor
 }
 
+GimbalHallSensors:: GimbalHallSensors(int panHallPin, int tiltHallPin): panHall(panHallPin), tiltHall(tiltHallPin){
+  PanHallPin = panHallPin;
+  TiltHallPin = tiltHallPin;
+  attachInterrupt(digitalPinToInterrupt(PanHallPin), panHallFallingISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(PanHallPin), panHallRisingISR, RISING);
+  attachInterrupt(digitalPinToInterrupt(TiltHallPin), tiltHallFallingISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(TiltHallPin), tiltHallRisingISR, RISING);
+};
+
+GimbalHallSensors:: HallSensor:: HallSensor(int pin){
+  this->pin = pin;
+}
+
+
 /*-----------------------------------------------------------------------class methods-------------------------------------------------------------------------------*/
 
 
@@ -160,7 +174,7 @@ void StepperMotor:: turn_to(double new_position, int delay = FixedStepperDelay){
 
 
 // make stepper turn by one step
-void StepperMotor:: step(int delay){
+void StepperMotor:: step(int delay = FixedStepperDelay){
   digitalWrite(STEP_PIN, HIGH); 
   delayMicroseconds(delay);
   digitalWrite(STEP_PIN, LOW); 
@@ -223,6 +237,13 @@ double StepperMotor:: get_position(){
 
 String StepperMotor:: get_name(){
   return MOTOR_NAME;
+}
+
+void StepperMotor:: home(bool& homingSwitch){
+  set_direction(1);
+  while (!homingSwitch){
+    step();
+  }
 }
 
 void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int delay){
@@ -300,6 +321,40 @@ void DualStepper:: turn_to(double pos1, double pos2, int delay = FixedStepperDel
 
   this->turn(deg_diff1, deg_diff2, dir1, dir2, delay);
 }
+
+void DualStepper:: home(GimbalHallSensors hallSensors){
+  stepper1.home(hallSensors.isPanHallClosed);
+  stepper2.home(hallSensors.isTiltHallClosed);
+}
+
+int GimbalHallSensors:: HallSensor:: read(){
+  return digitalRead(pin);
+}
+
+int GimbalHallSensors:: readPanHall(){
+  return panHall.read();
+}
+
+int GimbalHallSensors:: readTiltHall(){
+  return TiltHall.read();
+}
+
+void GimbalHallSensors:: panHallFallingISR(){
+  isPanHallClosed = true;
+}
+
+void GimbalHallSensors:: panHallRisingISR(){
+  isPanHallClosed = false;
+}
+
+void GimbalHallSensors:: tiltHallFallingISR(){
+  istiltHallClosed = true;
+}
+
+void GimbalHallSensors:: tiltHallRisingISR(){
+  istiltHallClosed = false;
+}
+
 
 /*--------------------------------------------------------------------general functions----------------------------------------------------------------------------------*/
 
