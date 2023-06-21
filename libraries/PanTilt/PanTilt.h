@@ -73,32 +73,35 @@ class StepperMotor {
     String get_name();
 };
 
-class GimbalHallSensors{
+class DualHallSensors{
   // Private class to be used by parent class.
-  Private:
+  private:
     class HallSensor{
       public:
         HallSensor(int pin);
+        HallSensor() = default; // default constructor for
         int read();
       private:
-        int pin;
+        int PIN;
     };
+    
     HallSensor panHall;
     HallSensor tiltHall;
-    void panHallFallingISR();
-    void panHallRisingISR();
-    void tiltHallFallingISR();
-    void tiltHallRisingISR();
+    void pan_hall_fallingISR();
+    void pan_hall_risingISR();
+    void tilt_hall_fallingISR();
+    void tilt_hall_risingISR();
+
   // Methods to be used by user.
   public:
-    GimbalHallSensors(int panHallPin, int tiltHallPin);
+    DualHallSensors(int panPin, int tiltPin);
     // Refrain from functions as interrupt variables are prefered.
     int readPanHall();
     int readTiltHall();
     // Use below interrupt variables to check state of hall effects.
     bool isPanHallClosed;
     bool isTiltHallClosed;
-}
+};
 
 class DualStepper {
   public:
@@ -112,7 +115,7 @@ class DualStepper {
 
     void turn(double deg1, double deg2, bool dir1, bool dir2, int delay); // bad implementation
     void turn_to(double pos1, double pos2, int delay);
-    void home(GimbalHallSensors hallSensors);
+    void home(DualHallSensors hallSensors);
 };
 
 

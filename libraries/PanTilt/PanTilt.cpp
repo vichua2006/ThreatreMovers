@@ -96,17 +96,20 @@ DualStepper:: DualStepper(StepperMotor &s1, StepperMotor &s2, int seg = PanTiltS
   // on member initalizer list: https://stackoverflow.com/questions/1711990/what-is-this-weird-colon-member-syntax-in-the-constructor
 }
 
-GimbalHallSensors:: GimbalHallSensors(int panHallPin, int tiltHallPin): panHall(panHallPin), tiltHall(tiltHallPin){
-  PanHallPin = panHallPin;
-  TiltHallPin = tiltHallPin;
+DualHallSensors:: DualHallSensors(int panPin, int tiltPin){
+
+  // initialize HallSensor instances
+  HallSensor panHall(panPin);
+  HallSensor tiltHall(tiltPin);
+
   attachInterrupt(digitalPinToInterrupt(PanHallPin), panHallFallingISR, FALLING);
   attachInterrupt(digitalPinToInterrupt(PanHallPin), panHallRisingISR, RISING);
   attachInterrupt(digitalPinToInterrupt(TiltHallPin), tiltHallFallingISR, FALLING);
   attachInterrupt(digitalPinToInterrupt(TiltHallPin), tiltHallRisingISR, RISING);
 };
 
-GimbalHallSensors:: HallSensor:: HallSensor(int pin){
-  this->pin = pin;
+DualHallSensors:: HallSensor:: HallSensor(int pin){
+  this->PIN = pin;
 }
 
 
@@ -322,37 +325,37 @@ void DualStepper:: turn_to(double pos1, double pos2, int delay = FixedStepperDel
   this->turn(deg_diff1, deg_diff2, dir1, dir2, delay);
 }
 
-void DualStepper:: home(GimbalHallSensors hallSensors){
+void DualStepper:: home(DualHallSensors hallSensors){
   stepper1.home(hallSensors.isPanHallClosed);
   stepper2.home(hallSensors.isTiltHallClosed);
 }
 
-int GimbalHallSensors:: HallSensor:: read(){
-  return digitalRead(pin);
+int DualHallSensors:: HallSensor:: read(){
+  return digitalRead(this->PIN);
 }
 
-int GimbalHallSensors:: readPanHall(){
+int DualHallSensors:: readPanHall(){
   return panHall.read();
 }
 
-int GimbalHallSensors:: readTiltHall(){
-  return TiltHall.read();
+int DualHallSensors:: readTiltHall(){
+  return tiltHall.read();
 }
 
-void GimbalHallSensors:: panHallFallingISR(){
+void DualHallSensors:: pan_hall_fallingISR(){
   isPanHallClosed = true;
 }
 
-void GimbalHallSensors:: panHallRisingISR(){
+void DualHallSensors:: pan_hall_risingISR(){
   isPanHallClosed = false;
 }
 
-void GimbalHallSensors:: tiltHallFallingISR(){
-  istiltHallClosed = true;
+void DualHallSensors:: tilt_hall_fallingISR(){
+  isTiltHallClosed = true;
 }
 
-void GimbalHallSensors:: tiltHallRisingISR(){
-  istiltHallClosed = false;
+void DualHallSensors:: tilt_hall_risingISR(){
+  isTiltHallClosed = false;
 }
 
 
