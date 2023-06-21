@@ -34,7 +34,9 @@ const int MotorEnablePin = 8;// enable pins for motor (cnc shield); must be at l
 const int PotPin = A0; // pin for potentiometer
 
 const int MinStepperDelay = 0;
-const int FixedStepperDelay = 500;
+const int FixedStepperDelay = 800;
+
+const int PanTiltSegment = 1000;
 
 String INPUT_STRING;
 double INPUT_POS;
@@ -47,6 +49,8 @@ StepperMotor pan("Pan stepper", PanPins, PanProp);
 StepperPins TiltPins(TiltStepPin, TiltDirPin, TiltHallPin, TiltAddress);
 StepperProperty TiltProp(TiltSteps, TiltGR, TiltUpper, TiltLower);
 StepperMotor tilt("Tilt stepper", TiltPins, TiltProp);
+
+DualStepper pan_tilt(pan, tilt, 360);
 
 /*---------------------------------------------------------------------class constructors---------------------------------------------------------------------------------*/
 
@@ -86,9 +90,10 @@ StepperMotor:: StepperMotor(String name,
   // CURR_POSITION = EEPROM.read(eeprom_address); // initalizes position by reading it from EEPROM: https://docs.arduino.cc/learn/built-in-libraries/eeprom
 }
 
-DualStepper:: DualStepper(const StepperMotor& s1, const StepperMotor& s2){
-  stepper1 = s1;
-  stepper2 = s2;
+DualStepper:: DualStepper(StepperMotor &s1, StepperMotor &s2, int seg = PanTiltSegment) : stepper1(s1), stepper2(s2) {
+  TURN_SEGMENTS = seg;
+  // more on reference member initalization: https://stackoverflow.com/questions/30069384/provides-no-initializer-for-reference-member
+  // on member initalizer list: https://stackoverflow.com/questions/1711990/what-is-this-weird-colon-member-syntax-in-the-constructor
 }
 
 /*-----------------------------------------------------------------------class methods-------------------------------------------------------------------------------*/
@@ -120,8 +125,7 @@ void StepperMotor:: turn(double deg_difference, bool dir, int delay = FixedStepp
   int delay_per_step = max(delay, MinStepperDelay); // calculate delay
   // 500 microseconds is pretty much the limit; anything faster the motor doesn't pick up
 
-  if (dir == 1) digitalWrite(DIR_PIN, HIGH); // set rotation direction
-  else digitalWrite(DIR_PIN, LOW);
+  this->set_direction(dir);
 
   for (int i=0;i<increments;i++){
     this->step(delay);
@@ -136,14 +140,15 @@ void StepperMotor:: turn(double deg_difference, bool dir, int delay = FixedStepp
   if (dir == 0) angular_displacement = -angular_displacement;
 
   // modify absolute position
-  CURR_POSITION += angular_displacement;
-  
+  this->set_position(CURR_POSITION + angular_displacement);
+
+  Serial.println(MOTOR_NAME + " at position " + CURR_POSITION); // debugging
 }
 
 // turns the motor to some absolute angular position
 void StepperMotor:: turn_to(double new_position, int delay = FixedStepperDelay){
   if (out_of_bounds(new_position)){
-    Serial.println(MOTOR_NAME + " OUTSIDE RANGE OF MOTION");
+    Serial.println(get_name() + " POSITION OUT OF RANGE");
     return ;
   }
 
@@ -151,8 +156,6 @@ void StepperMotor:: turn_to(double new_position, int delay = FixedStepperDelay){
   bool direction = (deg_difference > 0 ? 1 : 0); // 1 is cw, 0 ccw
 
   this->turn(deg_difference, direction, delay);// turn motor
-
-  
 }
 
 
@@ -164,9 +167,21 @@ void StepperMotor:: step(int delay){
   delayMicroseconds(delay); 
 }
 
+// set stepper position 
+void StepperMotor:: set_position(double position){
+  CURR_POSITION = position;
+}
+
+// set stepper roation direction
+void StepperMotor:: set_direction(bool dir){
+  if (dir == 1) digitalWrite(DIR_PIN, HIGH); // clockwise
+  else digitalWrite(DIR_PIN, LOW); // ccw
+}
+
 bool StepperMotor:: out_of_bounds(double position){
   return position < LOWER_BOUND || position > UPPER_BOUND;
 }
+
 
 // converts the degree difference to number of steps
 int StepperMotor:: deg_to_step(double deg){
@@ -206,6 +221,47 @@ double StepperMotor:: get_position(){
   return CURR_POSITION;
 }
 
+String StepperMotor:: get_name(){
+  return MOTOR_NAME;
+}
+
+// turn both steppers simultaneously
+// version 1 is implemented with use of StepperMotor:: turn()
+void DualStepper:: turn_to1(double pos1, double pos2, int delay = FixedStepperDelay){
+  // checks for boundary
+  if (stepper1.out_of_bounds(pos1) || stepper2.out_of_bounds(pos2)){
+    String msg = "";
+    if (stepper1.out_of_bounds(pos1)) msg += stepper1.get_name() + " ";
+    if (stepper2.out_of_bounds(pos2)) msg += stepper2.get_name() + " ";
+
+    Serial.println(msg + "POSITION OUT OF RANGE");
+    return;
+  }
+
+  // compute degree difference for first stepper
+  double deg_diff1 = stepper1.min_angle_difference(pos1);
+  bool dir1 = (deg_diff1 > 0 ? 1 : 0); 
+
+  // for second stepper
+  double deg_diff2 = stepper2.min_angle_difference(pos2);
+  bool dir2 = (deg_diff2 > 0 ? 1 : 0);
+
+  // compute the angle for each segment of the turns
+  double ang_per_seg1 = deg_diff1 / TURN_SEGMENTS;
+  double ang_per_seg2 = deg_diff2 / TURN_SEGMENTS;
+
+  double reference_pos1 = stepper1.get_position();
+  double reference_pos2 = stepper2.get_position();
+
+  for (int i=0;i<TURN_SEGMENTS;i++){
+    reference_pos1 += ang_per_seg1;
+    reference_pos2 += ang_per_seg2;
+
+    stepper1.turn_to(reference_pos1);
+    stepper2.turn_to(reference_pos2);
+  }
+}
+
 /*--------------------------------------------------------------------general functions----------------------------------------------------------------------------------*/
 
 
@@ -233,11 +289,8 @@ void mainLoop(){
     INPUT_STRING = Serial.readStringUntil('\n');
     INPUT_POS = INPUT_STRING.toDouble();
 
-    Serial.println(tilt.min_angle_difference(INPUT_POS));
-
-    tilt.turn_to(INPUT_POS);
-    
-    Serial.println(tilt.MOTOR_NAME + " at position " + tilt.get_position()); // debugging
+    pan_tilt.turn_to1(INPUT_POS, INPUT_POS);
   }
+
 }
 

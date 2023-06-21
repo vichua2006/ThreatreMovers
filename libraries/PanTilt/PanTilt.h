@@ -52,6 +52,8 @@ class StepperMotor {
     void turn(double deg, bool dir, int delay);
     void turn_to(double position, int delay);
     void step(int delay);
+    void set_position(double position);
+    void set_direction(bool dir);
 
     bool out_of_bounds(double position);
 
@@ -60,16 +62,22 @@ class StepperMotor {
     double step_to_deg(int inc);
     double min_angle_difference(double new_position);
     double get_position();
+
+    String get_name();
 };
 
 class DualStepper {
   public:
 
-    StepperMotor stepper1, stepper2;
+    StepperMotor &stepper1, &stepper2;
 
-    DualStepper(const StepperMotor& s1, const StepperMotor& s2);
+    int TURN_SEGMENTS; // specifies how many parts/segments a turn is broken into
+    // larger the number, smoother the movement (to be tested)
 
-    void turn_to(double angle1, double angle2);
+    DualStepper(StepperMotor &s1, StepperMotor &s2, int seg);
+
+    void turn_to1(double pos1, double pos2, int delay);
+    void turn_to2(double pos1, double pos2, int delay);
 };
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
