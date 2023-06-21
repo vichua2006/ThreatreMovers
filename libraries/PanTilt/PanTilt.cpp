@@ -102,16 +102,15 @@ DualHallSensors:: DualHallSensors(int panPin, int tiltPin){
   HallSensor panHall(panPin);
   HallSensor tiltHall(tiltPin);
 
-  attachInterrupt(digitalPinToInterrupt(PanHallPin), panHallFallingISR, FALLING);
-  attachInterrupt(digitalPinToInterrupt(PanHallPin), panHallRisingISR, RISING);
-  attachInterrupt(digitalPinToInterrupt(TiltHallPin), tiltHallFallingISR, FALLING);
-  attachInterrupt(digitalPinToInterrupt(TiltHallPin), tiltHallRisingISR, RISING);
+  attachInterrupt(digitalPinToInterrupt(panPin), pan_hall_fallingISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(panPin), pan_hall_risingISR, RISING);
+  attachInterrupt(digitalPinToInterrupt(tiltPin), tilt_hall_fallingISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(tiltPin), tilt_hall_risingISR, RISING);
 };
 
 DualHallSensors:: HallSensor:: HallSensor(int pin){
   this->PIN = pin;
 }
-
 
 /*-----------------------------------------------------------------------class methods-------------------------------------------------------------------------------*/
 

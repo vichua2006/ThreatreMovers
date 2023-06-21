@@ -73,6 +73,21 @@ class StepperMotor {
     String get_name();
 };
 
+class DualStepper {
+  public:
+
+    StepperMotor &stepper1, &stepper2;
+
+    int TURN_SEGMENTS; // specifies how many parts/segments a turn is broken into
+    // larger the number, smoother the movement (to be tested)
+
+    DualStepper(StepperMotor &s1, StepperMotor &s2, int seg);
+
+    void turn(double deg1, double deg2, bool dir1, bool dir2, int delay); // bad implementation
+    void turn_to(double pos1, double pos2, int delay);
+    void home(DualHallSensors hallSensors);
+};
+
 class DualHallSensors{
   // Private class to be used by parent class.
   private:
@@ -87,6 +102,7 @@ class DualHallSensors{
     
     HallSensor panHall;
     HallSensor tiltHall;
+    
     void pan_hall_fallingISR();
     void pan_hall_risingISR();
     void tilt_hall_fallingISR();
@@ -101,21 +117,6 @@ class DualHallSensors{
     // Use below interrupt variables to check state of hall effects.
     bool isPanHallClosed;
     bool isTiltHallClosed;
-};
-
-class DualStepper {
-  public:
-
-    StepperMotor &stepper1, &stepper2;
-
-    int TURN_SEGMENTS; // specifies how many parts/segments a turn is broken into
-    // larger the number, smoother the movement (to be tested)
-
-    DualStepper(StepperMotor &s1, StepperMotor &s2, int seg);
-
-    void turn(double deg1, double deg2, bool dir1, bool dir2, int delay); // bad implementation
-    void turn_to(double pos1, double pos2, int delay);
-    void home(DualHallSensors hallSensors);
 };
 
 
