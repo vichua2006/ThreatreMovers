@@ -16,7 +16,7 @@ const double TiltGR = 64 / 21;
 const double TiltUpper = 89;
 const double TiltLower = -89;
 
-const int MotorEnablePin = 8;// enable pins for motor (cnc shield); must be at low
+const int StepperEnablePin = 8;// enable pins for motor (cnc shield); must be at low
 const int PotPin = A0; // pin for potentiometer
 
 const int MinStepperDelay = 0;
@@ -28,11 +28,11 @@ String INPUT_STRING;
 double INPUT_POS;
 
 // create global instances
-StepperPins PanPins(PanStepPin, PanDirPin, PanHallPin, MotorEnablePin);
+StepperPins PanPins(PanStepPin, PanDirPin, PanHallPin, StepperEnablePin);
 StepperProperty PanProp(PanSteps, PanGR, PanUpper, PanLower);
 StepperMotor pan("Pan stepper", PanPins, PanProp);
 
-StepperPins TiltPins(TiltStepPin, TiltDirPin, TiltHallPin, MotorEnablePin);
+StepperPins TiltPins(TiltStepPin, TiltDirPin, TiltHallPin, StepperEnablePin);
 StepperProperty TiltProp(TiltSteps, TiltGR, TiltUpper, TiltLower);
 StepperMotor tilt("Tilt stepper", TiltPins, TiltProp);
 

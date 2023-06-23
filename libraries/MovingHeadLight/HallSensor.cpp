@@ -58,3 +58,6 @@ void DualHallSensors:: tilt_hall_risingISR(){
   isTiltHallClosed = false;
 }
 
+bool DualHallSensors:: isPanHallClosed;
+bool DualHallSensors:: isTiltHallClosed;
+

@@ -16,6 +16,38 @@
 // #include <ArduinoSTL.h>
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------*/
+class DualHallSensors{
+  // Private class to be used by parent class.
+  private:
+    class HallSensor{
+      public:
+        HallSensor(int pin);
+        HallSensor() = default; 
+        int read();
+      private:
+        int PIN;
+    };
+    
+    HallSensor panHall;
+    HallSensor tiltHall;
+
+    static void pan_hall_fallingISR();
+    static void pan_hall_risingISR();
+    static void tilt_hall_fallingISR();
+    static void tilt_hall_risingISR();
+
+  // Methods to be used by user.
+  public:
+    DualHallSensors(int panPin, int tiltPin);
+    // Refrain from functions as interrupt variables are prefered.
+    int readPanHall();
+    int readTiltHall();
+
+    // Use below interrupt variables to check state of hall effects.
+    static bool isPanHallClosed;
+    static bool isTiltHallClosed;
+};
+
 
 class StepperProperty{
   public:
@@ -81,43 +113,7 @@ class DualStepper {
 
     void turn(double deg1, double deg2, bool dir1, bool dir2, int delay); // bad implementation
     void turn_to(double pos1, double pos2, int delay);
-    void home(DualHallSensors hallSensors);
-};
-
-class DualHallSensors{
-  // Private class to be used by parent class.
-  private:
-    class HallSensor{
-      public:
-        HallSensor(int pin);
-        HallSensor() = default; 
-        int read();
-      private:
-        int PIN;
-    };
-    
-    HallSensor panHall;
-    HallSensor tiltHall;
-
-    static void pan_hall_fallingISR();
-    static void pan_hall_risingISR();
-    static void tilt_hall_fallingISR();
-    static void tilt_hall_risingISR();
-
-  // Methods to be used by user.
-  public:
-    DualHallSensors(int panPin, int tiltPin);
-    // Refrain from functions as interrupt variables are prefered.
-    int readPanHall();
-    int readTiltHall();
-
-    // Use below interrupt variables to check state of hall effects.
-    static bool isPanHallClosed;
-    static bool isTiltHallClosed;
-};
-
-class MovingHead{
-
+    void home(DualHallSensors& hallSensors);
 };
 
 

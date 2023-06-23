@@ -189,6 +189,8 @@ void StepperMotor:: init_enable_pin(){
   digitalWrite(ENABLE_PIN, LOW);
 }
 
+int StepperMotor:: ENABLE_PIN;
+
 void DualStepper:: init_pin_mode(){
   stepper1.init_pin_mode();
   stepper2.init_pin_mode();
@@ -272,7 +274,7 @@ void DualStepper:: turn_to(double pos1, double pos2, int delay = FixedStepperDel
   this->turn(deg_diff1, deg_diff2, dir1, dir2, delay);
 }
 
-void DualStepper:: home(DualHallSensors hallSensors){
+void DualStepper:: home(DualHallSensors& hallSensors){
   stepper1.home(hallSensors.isPanHallClosed);
   stepper2.home(hallSensors.isTiltHallClosed);
 }

@@ -34,6 +34,8 @@ class DualHallSensors{
   // Methods to be used by user.
   public:
     DualHallSensors(int panPin, int tiltPin);
+    DualHallSensors() = default;
+    
     void init_pin_mode();
     // Refrain from functions as interrupt variables are prefered.
     int read_pan_hall();

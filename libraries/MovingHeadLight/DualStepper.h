@@ -77,11 +77,12 @@ class DualStepper {
 
   public:
     DualStepper(StepperMotor &s1, StepperMotor &s2);
+    DualStepper() = default;
 
     void init_pin_mode();
     void turn(double deg1, double deg2, bool dir1, bool dir2, int delay); // bad implementation
     void turn_to(double pos1, double pos2, int delay);
-    void home(DualHallSensors hallSensors);
+    void home(DualHallSensors& hallSensors);
 };
 
 

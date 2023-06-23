@@ -318,7 +318,7 @@ void DualStepper:: turn_to(double pos1, double pos2, int delay = FixedStepperDel
   this->turn(deg_diff1, deg_diff2, dir1, dir2, delay);
 }
 
-void DualStepper:: home(DualHallSensors hallSensors){
+void DualStepper:: home(DualHallSensors& hallSensors){
   stepper1.home(hallSensors.isPanHallClosed);
   stepper2.home(hallSensors.isTiltHallClosed);
 }
