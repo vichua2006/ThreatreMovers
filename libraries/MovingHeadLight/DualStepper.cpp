@@ -202,50 +202,50 @@ void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int dela
   // ugly code; will optimise later
   // basically StepperMotor:: turn(), but for two steppers instead
 
-  StepperMotor &ts1 = stepper1, &ts2 = stepper2;
-
   double unsigned_difference1 = abs(deg1);
   double unsigned_difference2 = abs(deg2);
 
-  int inc1 = ts1.deg_to_step(unsigned_difference1);
-  int inc2 = ts2.deg_to_step(unsigned_difference2);
+  int inc1 = stepper1.deg_to_step(unsigned_difference1);
+  int inc2 = stepper2.deg_to_step(unsigned_difference2);
 
   int delay_per_step = max(delay, MinStepperDelay); 
 
-  ts1.set_direction(dir1);
-  ts2.set_direction(dir2);
+  stepper1.set_direction(dir1);
+  stepper2.set_direction(dir2);
+
 
   if (inc1 < inc2){
     int tinc = inc1;
     inc1 = inc2;
     inc2 = tinc;
 
-    StepperMotor &ts = ts1;
-    ts1 = ts2;
-    ts2 = ts;
+    StepperMotor &stepper = stepper1;
+    stepper1 = stepper2;
+    stepper2 = stepper;
+
   }
 
   for (int i=0,j=0;i<inc1;i++){
-    digitalWrite(ts1.get_step_pin(), HIGH);
+    digitalWrite(stepper1.get_step_pin(), HIGH);
     if (i >= (int) j * inc1 / inc2){
-      digitalWrite(ts2.get_step_pin(), HIGH);
+      digitalWrite(stepper2.get_step_pin(), HIGH);
       j ++ ;
     }
     delayMicroseconds(delay_per_step);
-    digitalWrite(ts1.get_step_pin(), LOW);
-    digitalWrite(ts2.get_step_pin(), LOW); 
+    digitalWrite(stepper1.get_step_pin(), LOW);
+    digitalWrite(stepper2.get_step_pin(), LOW); 
     delayMicroseconds(delay_per_step);
   }
 
-  double angular_displacement1 = ts1.step_to_deg(inc1);
-  double angular_displacement2 = ts2.step_to_deg(inc2);
+  double angular_displacement1 = stepper1.step_to_deg(inc1);
+  double angular_displacement2 = stepper2.step_to_deg(inc2);
 
   // if direction is ccw
   if (dir1 == 0) angular_displacement1 = -angular_displacement1;
   if (dir2 == 0) angular_displacement2 = -angular_displacement2;
 
-  ts1.set_position(ts1.get_position() + angular_displacement1);
-  ts2.set_position(ts2.get_position() + angular_displacement2);
+  stepper1.set_position(stepper1.get_position() + angular_displacement1);
+  stepper2.set_position(stepper2.get_position() + angular_displacement2);
 
   Serial.println(stepper1.get_name() + " at position " + stepper1.get_position()); // debugging
   Serial.println(stepper2.get_name() + " at position " + stepper2.get_position());

@@ -20,7 +20,7 @@ const int StepperEnablePin = 8;// enable pins for motor (cnc shield); must be at
 const int PotPin = A0; // pin for potentiometer
 
 const int MinStepperDelay = 0;
-const int FixedStepperDelay = 800;
+const int FixedStepperDelay = 700;
 
 const int PanTiltSegment = 1000;
 

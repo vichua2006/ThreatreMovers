@@ -2,7 +2,7 @@
  * Created by: Victor Huang and Rohan Katreddy
  * June 21, 2023
  *
- *     
+ * 2023-06-22: Defined static member in source file to avoid undefined reference
  */
 
 #ifndef HallSensor_h

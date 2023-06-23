@@ -4,7 +4,7 @@
  *
  * 
  * 2023-06-21: Added homing function.
- *     
+ * 2023-06-22: Defined static member in source file to avoid undefined reference
  */
 
 #ifndef DualStepper_h
