@@ -1,66 +1,20 @@
-/* source file for pan tilt mechanism
+/* source file for hall effect sensor positioning/homing mechanism
  * Created by: Victor Huang and Rohan Katreddy
  * May 16, 2023
  */
 
-#include "PanTilt.h"
-
-// min/max need to be redefined as StandardCplusplus/ArduinoSTL undef'ed them
-// this is copied from the arduino definition of min/max
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#define min(a, b) ((a) < (b) ? (a) : (b))
-
-const int INF = 1e9;
-
-const int PanSteps = 200;
-const int PanStepPin = 2;
-const int PanDirPin = 5;
-const int PanHallPin = 0;
-const int PanAddress = 0;// eeprom address; undecided
-const double PanGR = 144 / 17;
-const double PanUpper = 359.0;
-const double PanLower = -359.0;
-
-const int TiltSteps = 200;
-const int TiltStepPin = 3;
-const int TiltDirPin = 6;
-const int TiltHallPin = 0;
-const int TiltAddress = 1;// eeprom address; undecided
-const double TiltGR = 64 / 21;
-const double TiltUpper = 89;
-const double TiltLower = -89;
-
-const int MotorEnablePin = 8;// enable pins for motor (cnc shield); must be at low
-const int PotPin = A0; // pin for potentiometer
+#include "DualStepper.h"
 
 const int MinStepperDelay = 0;
 const int FixedStepperDelay = 800;
 
-const int PanTiltSegment = 1000;
 
-String INPUT_STRING;
-double INPUT_POS;
-
-// create global stepper instances
-StepperPins PanPins(PanStepPin, PanDirPin, PanHallPin, PanAddress);
-StepperProperty PanProp(PanSteps, PanGR, PanUpper, PanLower);
-StepperMotor pan("Pan stepper", PanPins, PanProp);
-
-StepperPins TiltPins(TiltStepPin, TiltDirPin, TiltHallPin, TiltAddress);
-StepperProperty TiltProp(TiltSteps, TiltGR, TiltUpper, TiltLower);
-StepperMotor tilt("Tilt stepper", TiltPins, TiltProp);
-
-DualStepper pan_tilt(pan, tilt, 360);
-
-DualHallSensors pan_tilt_sensors(PanHallPin, TiltHallPin);
-
-/*---------------------------------------------------------------------class constructors---------------------------------------------------------------------------------*/
-
-StepperPins:: StepperPins(int step, int dir, int hall, int eeprom_add){
+StepperPins:: StepperPins(int step, int dir, int hall, int enable){
   STEP_PIN = step;
   DIR_PIN = dir;
   HALL_PIN = hall;
-  EEPROM_ADDRESS = eeprom_add;
+
+  ENABLE_PIN = enable;
 }
 
 StepperProperty:: StepperProperty(int steps, double gr, double upper, double lower){
@@ -83,38 +37,18 @@ StepperMotor:: StepperMotor(String name,
   STEP_PIN = PinObj.STEP_PIN;
   DIR_PIN = PinObj.DIR_PIN;
   HALL_PIN = PinObj.HALL_PIN;
+  ENABLE_PIN = PinObj.ENABLE_PIN;
 
   STEPS_PER_DEGREE = GEAR_RATIO * (double) STEPS / 360.0;
   DEGREES_PER_STEP = 360.0 / (GEAR_RATIO * (double) STEPS);
 
   CURR_POSITION = 0; // zero by default
-
-  // CURR_POSITION = EEPROM.read(eeprom_address); // initalizes position by reading it from EEPROM: https://docs.arduino.cc/learn/built-in-libraries/eeprom
 }
 
-DualStepper:: DualStepper(StepperMotor &s1, StepperMotor &s2, int seg = PanTiltSegment) : stepper1(s1), stepper2(s2) {
-  TURN_SEGMENTS = seg;
+DualStepper:: DualStepper(StepperMotor &s1, StepperMotor &s2) : stepper1(s1), stepper2(s2) {
   // more on reference member initalization: https://stackoverflow.com/questions/30069384/provides-no-initializer-for-reference-member
   // on member initalizer list: https://stackoverflow.com/questions/1711990/what-is-this-weird-colon-member-syntax-in-the-constructor
 }
-
-DualHallSensors:: DualHallSensors(int panPin, int tiltPin){
-
-  // initialize HallSensor instances
-  HallSensor panHall(panPin);
-  HallSensor tiltHall(tiltPin);
-
-  attachInterrupt(digitalPinToInterrupt(panPin), pan_hall_fallingISR, FALLING);
-  attachInterrupt(digitalPinToInterrupt(panPin), pan_hall_risingISR, RISING);
-  attachInterrupt(digitalPinToInterrupt(tiltPin), tilt_hall_fallingISR, FALLING);
-  attachInterrupt(digitalPinToInterrupt(tiltPin), tilt_hall_risingISR, RISING);
-};
-
-DualHallSensors:: HallSensor:: HallSensor(int pin){
-  this->PIN = pin;
-}
-
-/*-----------------------------------------------------------------------class methods-------------------------------------------------------------------------------*/
 
 
 void StepperMotor:: init_pin_mode(){
@@ -122,12 +56,6 @@ void StepperMotor:: init_pin_mode(){
   pinMode(DIR_PIN, OUTPUT);
   pinMode(HALL_PIN, INPUT);
 }
-
-// hall effect sensor initalization; usage still uncertain
-void StepperMotor:: init_pos(){
-
-}
-
 
 // turns the motors some degrees in specified direction with a delay between steps, and directly modifies the motor's absolute position
 // deg_difference can be positive or negative; only magnitude matters
@@ -214,6 +142,10 @@ int StepperMotor:: deg_to_step(double deg){
   return deg * STEPS_PER_DEGREE;
 }
 
+int StepperMotor:: get_step_pin(){
+  return STEP_PIN;
+}
+
 // converts increment difference to number of degrees
 double StepperMotor:: step_to_deg(int inc){
   return (double) inc * DEGREES_PER_STEP;
@@ -251,6 +183,18 @@ String StepperMotor:: get_name(){
   return MOTOR_NAME;
 }
 
+void StepperMotor:: init_enable_pin(){
+  // enable pins for motor (cnc shield); must be at low
+  pinMode(ENABLE_PIN, OUTPUT);
+  digitalWrite(ENABLE_PIN, LOW);
+}
+
+void DualStepper:: init_pin_mode(){
+  stepper1.init_pin_mode();
+  stepper2.init_pin_mode();
+  stepper1.init_enable_pin();
+}
+
 
 void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int delay){
   // ugly code; will optimise later
@@ -280,14 +224,14 @@ void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int dela
   }
 
   for (int i=0,j=0;i<inc1;i++){
-    digitalWrite(ts1.STEP_PIN, HIGH);
+    digitalWrite(ts1.get_step_pin(), HIGH);
     if (i >= (int) j * inc1 / inc2){
-      digitalWrite(ts2.STEP_PIN, HIGH);
+      digitalWrite(ts2.get_step_pin(), HIGH);
       j ++ ;
     }
     delayMicroseconds(delay_per_step);
-    digitalWrite(PanStepPin, LOW);
-    digitalWrite(TiltStepPin, LOW); 
+    digitalWrite(ts1.get_step_pin(), LOW);
+    digitalWrite(ts2.get_step_pin(), LOW); 
     delayMicroseconds(delay_per_step);
   }
 
@@ -332,63 +276,3 @@ void DualStepper:: home(DualHallSensors hallSensors){
   stepper1.home(hallSensors.isPanHallClosed);
   stepper2.home(hallSensors.isTiltHallClosed);
 }
-
-int DualHallSensors:: HallSensor:: read(){
-  return digitalRead(this->PIN);
-}
-
-int DualHallSensors:: readPanHall(){
-  return panHall.read();
-}
-
-int DualHallSensors:: readTiltHall(){
-  return tiltHall.read();
-}
-
-void DualHallSensors:: pan_hall_fallingISR(){
-  isPanHallClosed = true;
-}
-
-void DualHallSensors:: pan_hall_risingISR(){
-  isPanHallClosed = false;
-}
-
-void DualHallSensors:: tilt_hall_fallingISR(){
-  isTiltHallClosed = true;
-}
-
-void DualHallSensors:: tilt_hall_risingISR(){
-  isTiltHallClosed = false;
-}
-
-
-/*--------------------------------------------------------------------general functions----------------------------------------------------------------------------------*/
-
-
-void initPanTilt(){
-  
-  // enable pins for motor (cnc shield); must be at low
-  pinMode(MotorEnablePin, OUTPUT);
-  digitalWrite(MotorEnablePin, LOW);
-
-  pinMode(PotPin, INPUT);
-
-  pan.init_pin_mode();
-  tilt.init_pin_mode();
-
-}
-
-double readSerialInput(){
-  
-
-}
-
-void mainLoop(){
-  if (Serial.available()){
-    INPUT_STRING = Serial.readStringUntil('\n');
-    INPUT_POS = INPUT_STRING.toDouble();
-
-    pan_tilt.turn_to(INPUT_POS, INPUT_POS / 4);
-  }
-}
-

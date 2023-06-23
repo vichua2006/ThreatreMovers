@@ -1,11 +1,10 @@
 /* header file for pan tilt mechanism
  * Created by: Victor Huang and Rohan Katreddy
  * May 16, 2023
- */
-
-/* Change log
- * 2023-06-21:
- *     Added Hall sensor funcitionality and homing function.
+ *
+ * 
+ * 2023-06-21: Added Hall sensor funcitionality and homing function.
+ *     
  */
 
 #ifndef PanTilt_h
@@ -37,7 +36,7 @@ class StepperPins {
 };
 
 class StepperMotor {
-  public:
+  private:
 
     String MOTOR_NAME;
     int STEPS;
@@ -46,6 +45,8 @@ class StepperMotor {
     double UPPER_BOUND, LOWER_BOUND; // bounds on absolute position
     double STEPS_PER_DEGREE, DEGREES_PER_STEP;
 
+  public:
+
     StepperMotor(String name,
                  StepperPins PinObj,
                  StepperProperty PropObj); // constructor function
@@ -53,8 +54,6 @@ class StepperMotor {
     StepperMotor() = default;
 
     void init_pin_mode();
-    void init_pos();
-
     void turn(double deg, bool dir, int delay);
     void turn_to(double position, int delay);
     void step(int delay);
@@ -65,6 +64,7 @@ class StepperMotor {
     bool out_of_bounds(double position);
 
     int deg_to_step(double deg);
+    int get_step_pin();
 
     double step_to_deg(int inc);
     double min_angle_difference(double new_position);
@@ -74,14 +74,10 @@ class StepperMotor {
 };
 
 class DualStepper {
+  private: 
+    StepperMotor &stepper1, &stepper2;  
   public:
-
-    StepperMotor &stepper1, &stepper2;
-
-    int TURN_SEGMENTS; // specifies how many parts/segments a turn is broken into
-    // larger the number, smoother the movement (to be tested)
-
-    DualStepper(StepperMotor &s1, StepperMotor &s2, int seg);
+    DualStepper(StepperMotor &s1, StepperMotor &s2);
 
     void turn(double deg1, double deg2, bool dir1, bool dir2, int delay); // bad implementation
     void turn_to(double pos1, double pos2, int delay);
@@ -94,7 +90,7 @@ class DualHallSensors{
     class HallSensor{
       public:
         HallSensor(int pin);
-        HallSensor() = default; // default constructor for
+        HallSensor() = default; 
         int read();
       private:
         int PIN;
@@ -114,10 +110,14 @@ class DualHallSensors{
     // Refrain from functions as interrupt variables are prefered.
     int readPanHall();
     int readTiltHall();
+
     // Use below interrupt variables to check state of hall effects.
-    
     static bool isPanHallClosed;
     static bool isTiltHallClosed;
+};
+
+class MovingHead{
+
 };
 
 
