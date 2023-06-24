@@ -10,8 +10,8 @@
 #ifndef DualStepper_h
 #define DualStepper_h
 
-#include <Arduino.h>
 #include "HallSensor.h"
+#include <Arduino.h>
 
 class StepperProperty{
   public:
@@ -74,6 +74,7 @@ class StepperMotor {
 class DualStepper {
   private: 
     StepperMotor &stepper1, &stepper2;  
+    void swap_steppers();
 
   public:
     DualStepper(StepperMotor &s1, StepperMotor &s2);

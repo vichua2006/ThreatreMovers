@@ -4,6 +4,7 @@
  */
 
 #include "HallSensor.h"
+#include <Arduino.h>
 
 DualHallSensors:: HallSensor:: HallSensor(int pin){
   PIN = pin;

@@ -4,9 +4,15 @@
  */
 
 #include "DualStepper.h"
+#include <Arduino.h>
+#include <ArduinoSTL.h>
+#include <utility>
+#include "GeneralFunc.h"
 
 const int MinStepperDelay = 0;
 const int FixedStepperDelay = 800;
+const double OneRevolution = 360.0;
+const double BoundaryUC = 2.0; // boundary uncertainty of 2 degrees
 
 
 StepperPins:: StepperPins(int step, int dir, int hall, int enable){
@@ -39,8 +45,8 @@ StepperMotor:: StepperMotor(String name,
   HALL_PIN = PinObj.HALL_PIN;
   ENABLE_PIN = PinObj.ENABLE_PIN;
 
-  STEPS_PER_DEGREE = GEAR_RATIO * (double) STEPS / 360.0;
-  DEGREES_PER_STEP = 360.0 / (GEAR_RATIO * (double) STEPS);
+  STEPS_PER_DEGREE = GEAR_RATIO * (double) STEPS / OneRevolution;
+  DEGREES_PER_STEP = OneRevolution / (GEAR_RATIO * (double) STEPS);
 
   CURR_POSITION = 0; // zero by default
 }
@@ -93,8 +99,12 @@ void StepperMotor:: turn(double deg_difference, bool dir, int delay = FixedStepp
 
 // turns the motor to some absolute angular position
 void StepperMotor:: turn_to(double new_position, int delay = FixedStepperDelay){
+  if (new_position < 0){
+    Serial.println("POSITION CANNOT BE NEGATIVE");
+    return ;
+  }
   if (out_of_bounds(new_position)){
-    Serial.println(get_name() + " POSITION OUT OF RANGE");
+    Serial.println(this->get_name() + " POSITION OUT OF RANGE");
     return ;
   }
 
@@ -133,7 +143,7 @@ void StepperMotor:: home(bool& homingSwitch){
 }
 
 bool StepperMotor:: out_of_bounds(double position){
-  return position < LOWER_BOUND || position > UPPER_BOUND;
+  return position < LOWER_BOUND - BoundaryUC || position > UPPER_BOUND + BoundaryUC;
 }
 
 
@@ -156,19 +166,18 @@ double StepperMotor:: step_to_deg(int inc){
 double StepperMotor:: min_angle_difference(double position){
 
   double curr_relative_pos = CURR_POSITION; // calculate the current relative position
-  if (curr_relative_pos < 0) curr_relative_pos += 360.0;
+  if (curr_relative_pos < 0) curr_relative_pos += OneRevolution;
+  // if (position < 0) position += OneRevolution;
 
   double new_position = position - curr_relative_pos; // effectively set current relative position to 0
-  if (new_position < 0) new_position += 360.0; 
+  if (new_position < 0) new_position += OneRevolution; 
 
   double ang_difference1 = new_position; // clockwise distance
-  double ang_difference2 = new_position - 360.0; // counter-clockwise
+  double ang_difference2 = new_position - OneRevolution; // counter-clockwise
 
   // assume that angdiff1 is always more optimal
   if (abs(ang_difference1) > abs(ang_difference2)){
-    double temp = ang_difference1;
-    ang_difference1 = ang_difference2;
-    ang_difference2 = temp;
+    std:: swap(ang_difference1, ang_difference2);
   }
 
   if (out_of_bounds(CURR_POSITION + ang_difference1)) return ang_difference2;
@@ -190,6 +199,10 @@ void StepperMotor:: init_enable_pin(){
 }
 
 int StepperMotor:: ENABLE_PIN;
+
+void DualStepper:: swap_steppers(){
+  std:: swap(stepper1, stepper2);
+}
 
 void DualStepper:: init_pin_mode(){
   stepper1.init_pin_mode();
@@ -213,21 +226,20 @@ void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int dela
   stepper1.set_direction(dir1);
   stepper2.set_direction(dir2);
 
-
+  bool swapped = false;
   if (inc1 < inc2){
-    int tinc = inc1;
-    inc1 = inc2;
-    inc2 = tinc;
-
-    StepperMotor &stepper = stepper1;
-    stepper1 = stepper2;
-    stepper2 = stepper;
-
+    swapped = true;
+    std:: swap(inc1, inc2);
+    this->swap_steppers();
   }
 
+  // ratio needs to be precise, or else stepper with smaller increment will turn too much
+  double ratio = (double) inc1 / (double) inc2;
+
+  // j<inc2 should also be
   for (int i=0,j=0;i<inc1;i++){
     digitalWrite(stepper1.get_step_pin(), HIGH);
-    if (i >= (int) j * inc1 / inc2){
+    if (i >= (double) j * ratio && inc2 != 0){
       digitalWrite(stepper2.get_step_pin(), HIGH);
       j ++ ;
     }
@@ -235,6 +247,15 @@ void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int dela
     digitalWrite(stepper1.get_step_pin(), LOW);
     digitalWrite(stepper2.get_step_pin(), LOW); 
     delayMicroseconds(delay_per_step);
+  }
+
+  Serial.println(inc1);
+  Serial.println(inc2);
+
+  if (swapped){
+    // swap back
+    std:: swap(inc1, inc2);
+    this->swap_steppers();
   }
 
   double angular_displacement1 = stepper1.step_to_deg(inc1);
@@ -253,14 +274,17 @@ void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int dela
 
 // turn both steppers simultaneously
 void DualStepper:: turn_to(double pos1, double pos2, int delay = FixedStepperDelay){
-  // checks for boundary
+  if (pos1 < 0 || pos2 < 0){
+    Serial.println("POSITION CANNOT BE NEGATIVE");
+    return ;
+  }
   if (stepper1.out_of_bounds(pos1) || stepper2.out_of_bounds(pos2)){
     String msg = "";
     if (stepper1.out_of_bounds(pos1)) msg += stepper1.get_name() + " ";
     if (stepper2.out_of_bounds(pos2)) msg += stepper2.get_name() + " ";
 
     Serial.println(msg + "POSITION OUT OF RANGE");
-    return;
+    return ;
   }
 
   // compute degree difference for first stepper
@@ -272,6 +296,9 @@ void DualStepper:: turn_to(double pos1, double pos2, int delay = FixedStepperDel
   bool dir2 = (deg_diff2 > 0 ? 1 : 0);
 
   this->turn(deg_diff1, deg_diff2, dir1, dir2, delay);
+
+  Serial.println(deg_diff1);
+  Serial.println(deg_diff2);
 }
 
 void DualStepper:: home(DualHallSensors& hallSensors){

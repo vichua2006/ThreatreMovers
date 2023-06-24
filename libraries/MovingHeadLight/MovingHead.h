@@ -7,7 +7,6 @@
 #ifndef MovingHead_h
 #define MovingHead_h
 
-#include <Arduino.h>
 #include "DualStepper.h"
 #include "HallSensor.h"
 

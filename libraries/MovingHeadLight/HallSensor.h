@@ -8,8 +8,6 @@
 #ifndef HallSensor_h
 #define HallSensor_h
 
-#include <Arduino.h>
-
 class DualHallSensors{
   // Private class to be used by parent class.
   private:
