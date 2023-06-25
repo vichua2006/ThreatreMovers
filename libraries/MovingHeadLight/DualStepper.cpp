@@ -93,17 +93,17 @@ void StepperMotor:: turn(double deg_difference, bool dir, int delay = FixedStepp
   // modify absolute position
   this->set_position(CURR_POSITION + angular_displacement);
 
-  Serial.println(MOTOR_NAME + " at position " + CURR_POSITION); // debugging
+  // Serial.println(MOTOR_NAME + " at position " + CURR_POSITION); // debugging
 }
 
 // turns the motor to some absolute angular position
 void StepperMotor:: turn_to(double new_position, int delay = FixedStepperDelay){
   if (new_position < 0){
-    Serial.println("POSITION CANNOT BE NEGATIVE");
+    // Serial.println("POSITION CANNOT BE NEGATIVE");
     return ;
   }
   if (out_of_bounds(new_position)){
-    Serial.println(this->get_name() + " POSITION OUT OF RANGE");
+    // Serial.println(this->get_name() + " POSITION OUT OF RANGE");
     return ;
   }
 
@@ -248,9 +248,6 @@ void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int dela
     delayMicroseconds(delay_per_step);
   }
 
-  Serial.println(inc1);
-  Serial.println(inc2);
-
   if (swapped){
     // swap back
     std:: swap(inc1, inc2);
@@ -267,14 +264,14 @@ void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int dela
   stepper1.set_position(stepper1.get_position() + angular_displacement1);
   stepper2.set_position(stepper2.get_position() + angular_displacement2);
 
-  Serial.println(stepper1.get_name() + " at position " + stepper1.get_position()); // debugging
-  Serial.println(stepper2.get_name() + " at position " + stepper2.get_position());
+  // Serial.println(stepper1.get_name() + " at position " + stepper1.get_position()); // debugging
+  // Serial.println(stepper2.get_name() + " at position " + stepper2.get_position());
 }
 
 // turn both steppers simultaneously
 void DualStepper:: turn_to(double pos1, double pos2, int delay = FixedStepperDelay){
   if (pos1 < 0 || pos2 < 0){
-    Serial.println("POSITION CANNOT BE NEGATIVE");
+    // Serial.println("POSITION CANNOT BE NEGATIVE");
     return ;
   }
   if (stepper1.out_of_bounds(pos1) || stepper2.out_of_bounds(pos2)){
@@ -282,7 +279,7 @@ void DualStepper:: turn_to(double pos1, double pos2, int delay = FixedStepperDel
     if (stepper1.out_of_bounds(pos1)) msg += stepper1.get_name() + " ";
     if (stepper2.out_of_bounds(pos2)) msg += stepper2.get_name() + " ";
 
-    Serial.println(msg + "POSITION OUT OF RANGE");
+    // Serial.println(msg + "POSITION OUT OF RANGE");
     return ;
   }
 
@@ -295,9 +292,6 @@ void DualStepper:: turn_to(double pos1, double pos2, int delay = FixedStepperDel
   bool dir2 = (deg_diff2 > 0 ? 1 : 0);
 
   this->turn(deg_diff1, deg_diff2, dir1, dir2, delay);
-
-  Serial.println(deg_diff1);
-  Serial.println(deg_diff2);
 }
 
 void DualStepper:: home(DualHallSensors& hallSensors){

@@ -5,6 +5,7 @@
 
 #include "MovingHead.h"
 #include <Arduino.h>
+#include <DMXSerial.h>
 
 MovingHead:: MovingHead(DualStepper &steppers, DualHallSensors &sensors) : PanTilt(steppers), PanTiltHallSensor(sensors){
     // reference members must be already initalized
