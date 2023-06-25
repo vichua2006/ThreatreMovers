@@ -6,33 +6,33 @@
 #include "HallSensor.h"
 #include <Arduino.h>
 
-DualHallSensors:: HallSensor:: HallSensor(int pin){
+HallSensor:: HallSensor(int pin){
   PIN = pin;
 }
 
-void DualHallSensors:: HallSensor:: init_pin_mode(){
+void HallSensor:: init_pin_mode(){
   pinMode(PIN, INPUT);
 }
 
-int DualHallSensors:: HallSensor:: read(){
-  return digitalRead(this->PIN);
+int HallSensor:: get_pin(){
+  return PIN;
 }
 
-DualHallSensors:: DualHallSensors(int panPin, int tiltPin){
+int HallSensor:: read(){
+  // Serial.println("pin is at: " + PIN); // debugging
+  return digitalRead(PIN);
+}
 
-  // initialize HallSensor instances
-  HallSensor panHall(panPin);
-  HallSensor tiltHall(tiltPin);
-
-  attachInterrupt(digitalPinToInterrupt(panPin), pan_hall_fallingISR, FALLING);
-  attachInterrupt(digitalPinToInterrupt(panPin), pan_hall_risingISR, RISING);
-  attachInterrupt(digitalPinToInterrupt(tiltPin), tilt_hall_fallingISR, FALLING);
-  attachInterrupt(digitalPinToInterrupt(tiltPin), tilt_hall_risingISR, RISING);
-};
+DualHallSensors:: DualHallSensors(HallSensor& PanH, HallSensor& TiltH) : panHall(PanH), tiltHall(TiltH){
+  
+}
 
 void DualHallSensors:: init_pin_mode(){
   panHall.init_pin_mode();
   tiltHall.init_pin_mode();
+
+  attachInterrupt(digitalPinToInterrupt(panHall.get_pin()), pan_hall_changingISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(tiltHall.get_pin()), tilt_hall_changingISR, CHANGE);
 }
 
 int DualHallSensors:: read_pan_hall(){
@@ -43,22 +43,14 @@ int DualHallSensors:: read_tilt_hall(){
   return tiltHall.read();
 }
 
-void DualHallSensors:: pan_hall_fallingISR(){
-  isPanHallClosed = true;
+void DualHallSensors:: pan_hall_changingISR(){
+  isPanHallClosed ^= 1;
 }
 
-void DualHallSensors:: pan_hall_risingISR(){
-  isPanHallClosed = false;
+void DualHallSensors:: tilt_hall_changingISR(){
+  isTiltHallClosed ^= 1;
 }
 
-void DualHallSensors:: tilt_hall_fallingISR(){
-  isTiltHallClosed = true;
-}
-
-void DualHallSensors:: tilt_hall_risingISR(){
-  isTiltHallClosed = false;
-}
-
-bool DualHallSensors:: isPanHallClosed;
-bool DualHallSensors:: isTiltHallClosed;
+bool DualHallSensors:: isPanHallClosed = false;
+bool DualHallSensors:: isTiltHallClosed = false;
 

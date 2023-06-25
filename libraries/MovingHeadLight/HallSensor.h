@@ -3,35 +3,39 @@
  * June 21, 2023
  *
  * 2023-06-22: Defined static member in source file to avoid undefined reference
+ * 2023-06-25: changed HallSenor class to public for debugging, changed IRS to change mode
+ * 
  */
 
 #ifndef HallSensor_h
 #define HallSensor_h
 
-class DualHallSensors{
-  // Private class to be used by parent class.
-  private:
-    class HallSensor{
-      public:
-        HallSensor(int pin);
-        HallSensor() = default; 
-        void init_pin_mode();
-        int read();
-      private:
-        int PIN;
-    };
-    
-    HallSensor panHall;
-    HallSensor tiltHall;
-
-    static void pan_hall_fallingISR();
-    static void pan_hall_risingISR();
-    static void tilt_hall_fallingISR();
-    static void tilt_hall_risingISR();
-
-  // Methods to be used by user.
+class HallSensor{
   public:
-    DualHallSensors(int panPin, int tiltPin);
+    int PIN;
+
+    HallSensor(int pin);
+    HallSensor() = default; 
+    
+    void init_pin_mode();
+    
+    int get_pin();
+    int read();
+    
+};
+    
+
+class DualHallSensors{
+
+  public:
+
+    HallSensor& panHall;
+    HallSensor& tiltHall;
+
+    static void pan_hall_changingISR();
+    static void tilt_hall_changingISR();
+
+    DualHallSensors(HallSensor& PanH, HallSensor& TiltH);
     DualHallSensors() = default;
     
     void init_pin_mode();

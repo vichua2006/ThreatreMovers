@@ -5,3 +5,6 @@
 
 # ignore all files in .vscode directory
 .vscode/
+
+# ignore arduino test file
+test/

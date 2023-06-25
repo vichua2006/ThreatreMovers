@@ -56,7 +56,6 @@ DualStepper:: DualStepper(StepperMotor &s1, StepperMotor &s2) : stepper1(s1), st
   // on member initalizer list: https://stackoverflow.com/questions/1711990/what-is-this-weird-colon-member-syntax-in-the-constructor
 }
 
-
 void StepperMotor:: init_pin_mode(){
   pinMode(STEP_PIN, OUTPUT);
   pinMode(DIR_PIN, OUTPUT);

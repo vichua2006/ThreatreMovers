@@ -36,7 +36,7 @@ void setup() {
   DMXSerial.init(DMXReceiver);
 
   // set some default values
-  DMXSerial.write(1, 80);
+  DMXSerial.write(1, 0);
   DMXSerial.write(2, 0);
   DMXSerial.write(3, 0);
 
@@ -63,6 +63,14 @@ void loop() {
     analogWrite(GreenPin, GreenDefaultLevel);
     analogWrite(BluePin, BlueDefaultLevel);
   } // if
+
+  // int RedLevel = map(DMXSerial.read(startChannel), 0, 255, 0, 1023);
+  // int GreenLevel = map(DMXSerial.read(startChannel + 1), 0, 255, 0, 1023);
+  // int BlueLevel = map(DMXSerial.read(startChannel + 2), 0, 255, 0, 1023);
+
+  // analogWrite(RedPin, RedLevel);
+  // analogWrite(GreenPin, GreenLevel);
+  // analogWrite(BluePin, BlueLevel);
 }
 
 // End.

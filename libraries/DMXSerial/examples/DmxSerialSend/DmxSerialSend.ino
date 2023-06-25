@@ -81,4 +81,17 @@ void loop() {
   } // if
 
   delayMicroseconds(2000); // wait a little bit
+
+
+  // for (int i=0;i<6;i++){
+  //   RedLevel = RedList[i];
+  //   GreenLevel = GreenList[i];
+  //   BlueLevel = BlueList[i];
+
+  //   DMXSerial.write(1, RedLevel);
+  //   DMXSerial.write(2, GreenLevel);
+  //   DMXSerial.write(3, BlueLevel);
+
+  //   delayMicroseconds(2000);
+  // }
 } // loop
