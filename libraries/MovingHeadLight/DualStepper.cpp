@@ -4,13 +4,10 @@
  */
 
 #include "DualStepper.h"
-#include <Arduino.h>
 #include "GeneralFunc.h"
+#include "config.h"
+#include <Arduino.h>
 
-const int MinStepperDelay = 0;
-const int FixedStepperDelay = 800;
-const double OneRevolution = 360.0;
-const double BoundaryUC = 2.0; // boundary uncertainty of 2 degrees
 
 StepperPins:: StepperPins(int step, int dir, int hall, int enable){
   STEP_PIN = step;

@@ -1,9 +1,14 @@
 #include "MovingHead.h"
 #include "GeneralFunc.h"
-#include <DMXSerial.h>
 #include <config.h>
 
-// create global instances
+
+#ifdef USE_DMX
+#include <DMXSerial.h>
+#endif
+
+
+// create class instances and build mover object
 StepperPins PanPins(PanStepPin, PanDirPin, PanHallPin, StepperEnablePin);
 StepperProperty PanProp(PanSteps, PanGR, PanUpper, PanLower);
 StepperMotor pan("Pan stepper", PanPins, PanProp);
@@ -17,26 +22,11 @@ DualStepper pan_tilt(pan, tilt);
 HallSensor pan_sensor(PanHallPin), tilt_sensor(TiltHallPin);
 DualHallSensors pan_tilt_sensors(pan_sensor, tilt_sensor);
 
-MovingHead mover(pan_tilt, pan_tilt_sensors);
+MovingHead mover(pan_tilt, pan_tilt_sensors, DefaultStartChannel);
 
-double X[] = {32, 128, 0, 333, 270, 34, 52, 126, 123, 6}, Y[] = {89, 0, 45, 4, 89, 8, 68, 90, 23, 15};
+// double X[] = {32, 128, 0, 333, 270, 34, 52, 126, 123, 6}, Y[] = {89, 0, 45, 4, 89, 8, 68, 90, 23, 15};
+// int x = 45, y = 90; // debugging
 
-int x = 45, y = 90;
-
-int read_dmx(int channel)
-{
-  return DMXSerial.read(channel);
-}
-
-int read_and_map_dmx(int channel, int minimum, int maximum)
-{
-  return map(read_dmx(channel), 0, 255, minimum, maximum);
-}
-
-void apply_dmx()
-{
-  mover.move_to(read_and_map_dmx(1, 0, 359), read_and_map_dmx(2, 0, 90), FixedStepperDelay);
-}
 
 void reset()
 {
@@ -45,11 +35,10 @@ void reset()
 
 void setup() {
   mover.init_pin_mode();
-  DMXSerial.init(DMXReceiver, 5);
 }
 
 void loop() {
-  apply_dmx();
+  mover.main_cycle();
 }
 
 
