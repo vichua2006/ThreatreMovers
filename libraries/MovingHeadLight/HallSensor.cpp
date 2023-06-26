@@ -19,7 +19,6 @@ int HallSensor:: get_pin(){
 }
 
 int HallSensor:: read(){
-  // Serial.println("pin is at: " + PIN); // debugging
   return digitalRead(PIN);
 }
 
@@ -31,6 +30,7 @@ void DualHallSensors:: init_pin_mode(){
   panHall.init_pin_mode();
   tiltHall.init_pin_mode();
 
+  // initialise interrupts
   attachInterrupt(digitalPinToInterrupt(panHall.get_pin()), pan_hall_changingISR, CHANGE);
   attachInterrupt(digitalPinToInterrupt(tiltHall.get_pin()), tilt_hall_changingISR, CHANGE);
 }

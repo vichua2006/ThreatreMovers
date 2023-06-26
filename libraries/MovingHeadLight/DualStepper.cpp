@@ -5,15 +5,12 @@
 
 #include "DualStepper.h"
 #include <Arduino.h>
-#include <ArduinoSTL.h>
-#include <utility>
 #include "GeneralFunc.h"
 
 const int MinStepperDelay = 0;
 const int FixedStepperDelay = 800;
 const double OneRevolution = 360.0;
 const double BoundaryUC = 2.0; // boundary uncertainty of 2 degrees
-
 
 StepperPins:: StepperPins(int step, int dir, int hall, int enable){
   STEP_PIN = step;
@@ -176,7 +173,7 @@ double StepperMotor:: min_angle_difference(double position){
 
   // assume that angdiff1 is always more optimal
   if (abs(ang_difference1) > abs(ang_difference2)){
-    std:: swap(ang_difference1, ang_difference2);
+    swap(ang_difference1, ang_difference2);
   }
 
   if (out_of_bounds(CURR_POSITION + ang_difference1)) return ang_difference2;
@@ -200,7 +197,7 @@ void StepperMotor:: init_enable_pin(){
 int StepperMotor:: ENABLE_PIN;
 
 void DualStepper:: swap_steppers(){
-  std:: swap(stepper1, stepper2);
+  swap(stepper1, stepper2);
 }
 
 void DualStepper:: init_pin_mode(){
@@ -228,7 +225,7 @@ void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int dela
   bool swapped = false;
   if (inc1 < inc2){
     swapped = true;
-    std:: swap(inc1, inc2);
+    swap(inc1, inc2);
     this->swap_steppers();
   }
 
@@ -250,7 +247,7 @@ void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int dela
 
   if (swapped){
     // swap back
-    std:: swap(inc1, inc2);
+    swap(inc1, inc2);
     this->swap_steppers();
   }
 
