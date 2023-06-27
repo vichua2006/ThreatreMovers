@@ -17,6 +17,6 @@ template<typename T> void swap(T& t1, T& t2) {
     T tmp(t1);
     t1=t2;
     t2=tmp;
-}
+} // template classes and functions must be defined in the header file (https://forum.arduino.cc/t/a-small-doubt-regarding-the-use-of-templates-in-libraries/850865)
 
 #endif

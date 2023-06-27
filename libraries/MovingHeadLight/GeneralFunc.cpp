@@ -3,6 +3,7 @@
  * June 23, 2023
  */
 
+#include <GeneralFunc.h>
 #include <Arduino.h>
 
 bool isZero(double x){
