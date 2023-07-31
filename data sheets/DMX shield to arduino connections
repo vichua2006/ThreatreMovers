@@ -1,0 +1,7 @@
+(rs485) B to D- (DMX shield)
+(rs485) A to D+ (DMX shield)
+(rs485) DE, GND to GND (DMX shield)
+(rs485) RE to pin 5 (slave arduino)
+(rs485) R0 to pin 0 / RX (slave arduino)
+(rs485) VCC to 5V (slave arduino)
+(slave arduino) GND to GND (DMX shield)
