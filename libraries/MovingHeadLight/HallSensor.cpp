@@ -1,4 +1,4 @@
-/* source file for pan tilt mechanism
+/* source file for hall effect sensor positioning/homing mechanism
  * Created by: Victor Huang and Rohan Katreddy
  * June 22, 2023
  */

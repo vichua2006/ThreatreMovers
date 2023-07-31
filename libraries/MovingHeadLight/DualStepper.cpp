@@ -1,4 +1,4 @@
-/* source file for hall effect sensor positioning/homing mechanism
+/* source file for pan tilt mechanism
  * Created by: Victor Huang and Rohan Katreddy
  * May 16, 2023
  */
@@ -50,6 +50,7 @@ DualStepper:: DualStepper(StepperMotor &s1, StepperMotor &s2) : stepper1(s1), st
   // on member initalizer list: https://stackoverflow.com/questions/1711990/what-is-this-weird-colon-member-syntax-in-the-constructor
 }
 
+// initialize arduino pins for stepper
 void StepperMotor:: init_pin_mode(){
   pinMode(STEP_PIN, OUTPUT);
   pinMode(DIR_PIN, OUTPUT);
@@ -135,6 +136,7 @@ void StepperMotor:: home(bool& homingSwitch){
   }
 }
 
+// checks if the given position is out of bounds with uncertainty
 bool StepperMotor:: out_of_bounds(double position){
   return position < LOWER_BOUND - BoundaryUC || position > UPPER_BOUND + BoundaryUC;
 }
@@ -191,8 +193,10 @@ void StepperMotor:: init_enable_pin(){
   digitalWrite(ENABLE_PIN, LOW);
 }
 
+// static variable initialization
 int StepperMotor:: ENABLE_PIN;
 
+// swap stepper references. for internal usage.
 void DualStepper:: swap_steppers(){
   swap(stepper1, stepper2);
 }
@@ -203,7 +207,7 @@ void DualStepper:: init_pin_mode(){
   stepper1.init_enable_pin();
 }
 
-
+// turns both steppers simultaneously, finishing at the same time
 void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int delay){
   // ugly code; will optimise later
   // basically StepperMotor:: turn(), but for two steppers instead
@@ -229,9 +233,10 @@ void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int dela
   // ratio needs to be precise, or else stepper with smaller increment will turn too much
   double ratio = (double) inc1 / (double) inc2;
 
-  // j<inc2 should also be
+  // essentially, stepper2 steps once every {ratio} times stepper1 steps
   for (int i=0,j=0;i<inc1;i++){
     digitalWrite(stepper1.get_step_pin(), HIGH);
+    // for whatever reason, if inc2 == 0, ratio is then -1, causing stepper2 to step every step.
     if (i >= (double) j * ratio && inc2 != 0){
       digitalWrite(stepper2.get_step_pin(), HIGH);
       j ++ ;
