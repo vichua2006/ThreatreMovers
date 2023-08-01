@@ -1,0 +1,7 @@
+MASTER SLAVE
+GND  ->  GND
+D+  ->  A
+D-  ->  B
+        DE -> GND
+        RE -> 5
+        RO -> RX
