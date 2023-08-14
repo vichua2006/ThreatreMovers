@@ -54,7 +54,7 @@ void MovingHead:: main_cycle(){
     int panPos = map(read_dmx_channel(PAN_CHAN), 0, 255, PanInputLower, PanInputUpper);
     int tiltPos = map(read_dmx_channel(TILT_CHAN), 0, 255, TiltInputLower, TiltInputUpper);
 
-    move_to(panPos, tiltPos, FixedStepperDelay);
+    move_to(panPos, tiltPos, MinStepperDelay);
 }
 
 int MovingHead:: read_dmx_channel(int channel){

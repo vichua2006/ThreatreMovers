@@ -35,11 +35,12 @@ void reset()
 
 void setup() {
   mover.init_pin_mode();
+
+  pinMode(13, OUTPUT);
 }
 
 void loop() {
   mover.main_cycle();
 }
-
 
 
