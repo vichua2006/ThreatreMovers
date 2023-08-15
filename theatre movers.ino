@@ -1,12 +1,22 @@
+#include <AccelStepper.h>
 #include "MovingHead.h"
 #include "GeneralFunc.h"
 #include <config.h>
 
 
-#ifdef USE_DMX
+// to avoid conflict with serial in/out
+#ifdef USING_DMX
 #include <DMXSerial.h>
 #endif
 
+#ifdef USING_ACCELSTEPPER
+
+AccelStepper pan(AccelStepper:: DRIVER, PanStepPin, PanDirPin);
+AccelStepper tilt(AccelStepper:: DRIVER, TiltStepPin, TiltDirPin);
+
+#endif
+
+#ifndef USING_ACCELSTEPPER
 
 // create class instances and build mover object
 StepperPins PanPins(PanStepPin, PanDirPin, PanHallPin, StepperEnablePin);
@@ -16,6 +26,9 @@ StepperMotor pan("Pan stepper", PanPins, PanProp);
 StepperPins TiltPins(TiltStepPin, TiltDirPin, TiltHallPin, StepperEnablePin);
 StepperProperty TiltProp(TiltSteps, TiltGR, TiltUpper, TiltLower);
 StepperMotor tilt("Tilt stepper", TiltPins, TiltProp);
+
+#endif
+
 
 DualStepper pan_tilt(pan, tilt);
 
@@ -28,7 +41,7 @@ MovingHead mover(pan_tilt, pan_tilt_sensors, DefaultStartChannel);
 // int x = 45, y = 90; // debugging
 
 void setup() {
-  #ifndef USE_DMX
+  #ifndef USING_DMX
   Serial.begin(9600);
   #endif
 

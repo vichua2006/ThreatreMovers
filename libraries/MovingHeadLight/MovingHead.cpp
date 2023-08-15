@@ -8,20 +8,20 @@
 #include <config.h>
 
 
-#ifdef USE_DMX
+#ifdef USING_DMX
 #include <DMXSerial.h>
 #endif
 
 MovingHead:: MovingHead(DualStepper &steppers, DualHallSensors &sensors, int start_chan) : panTilt(steppers), panTiltHallSensor(sensors){
     // reference members must be already initalized
-    new_start_channel(start_chan);
+    this->new_start_channel(start_chan);
 }
 
 void MovingHead:: init_pin_mode(){
     panTilt.init_pin_mode();
     panTiltHallSensor.init_pin_mode();
 
-    #ifdef USE_DMX
+    #ifdef USING_DMX
     DMXSerial.init(DMXReceiver, DMXReceiverPin);
     #endif
 }
@@ -47,14 +47,14 @@ void MovingHead:: new_start_channel(int new_channel){
     TILT_CHAN = new_channel + RelativeTiltChan;
 }
 
-#ifdef USE_DMX
+#ifdef USING_DMX
 
 void MovingHead:: main_cycle(){
 
     int panPos = map(read_dmx_channel(PAN_CHAN), 0, 255, PanInputLower, PanInputUpper);
     int tiltPos = map(read_dmx_channel(TILT_CHAN), 0, 255, TiltInputLower, TiltInputUpper);
 
-    move_to(panPos, tiltPos);
+    this->move_to(panPos, tiltPos);
 }
 
 int MovingHead:: read_dmx_channel(int channel){

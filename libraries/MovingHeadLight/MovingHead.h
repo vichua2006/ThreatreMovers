@@ -2,7 +2,7 @@
  * Created by: Victor Huang and Rohan Katreddy
  * June 22, 2023
  *
- * 2023-06-25: added ifdef USE_DMX for debugging
+ * 2023-06-25: added ifdef USING_DMX for debugging
  */
 
 #ifndef MovingHead_h
@@ -36,7 +36,7 @@ class MovingHead{
         void find_home();
         void new_start_channel(int new_channel);
 
-        #ifdef USE_DMX
+        #ifdef USING_DMX
         void main_cycle();
         int read_dmx_channel(int channel);
         #endif
