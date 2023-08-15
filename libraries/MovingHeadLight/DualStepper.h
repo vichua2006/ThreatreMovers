@@ -6,6 +6,7 @@
  * 2023-06-21: Added homing function.
  * 2023-06-22: Defined static member in source file to avoid undefined reference
  * 2023-06-23: Added swap_stepper function and debugged Dualstepper methods
+ * 2023-08-14: Reduced/increased range of pan/tilt & set fixed delay
  */
 
 #ifndef DualStepper_h
@@ -40,6 +41,7 @@ class StepperMotor {
     double GEAR_RATIO, CURR_POSITION; // current absolute position
     double UPPER_BOUND, LOWER_BOUND; // bounds on absolute position
     double STEPS_PER_DEGREE, DEGREES_PER_STEP;
+    double SPEED; // in rpm
 
     static int ENABLE_PIN;
 
@@ -52,7 +54,7 @@ class StepperMotor {
 
     void init_pin_mode();
     void turn(double deg, bool dir, int delay);
-    void turn_to(double position, int delay);
+    // void turn_to(double position, int delay);
     void step(int delay);
     void set_position(double position);
     void set_direction(bool dir);
@@ -64,7 +66,8 @@ class StepperMotor {
     int get_step_pin();
 
     double step_to_deg(int inc);
-    double min_angle_difference(double new_position);
+    // double min_angle_difference(double new_position);
+    double get_angle_difference(double new_position);
     double get_position();
   
     String get_name();
@@ -82,8 +85,8 @@ class DualStepper {
     DualStepper() = default;
 
     void init_pin_mode();
-    void turn(double deg1, double deg2, bool dir1, bool dir2, int delay); // bad implementation
-    void turn_to(double pos1, double pos2, int delay);
+    void turn(double deg1, double deg2, bool dir1, bool dir2); // bad implementation
+    void turn_to(double pos1, double pos2);
     void home(DualHallSensors& hallSensors);
 };
 

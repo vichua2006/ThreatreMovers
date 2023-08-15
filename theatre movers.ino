@@ -27,20 +27,22 @@ MovingHead mover(pan_tilt, pan_tilt_sensors, DefaultStartChannel);
 // double X[] = {32, 128, 0, 333, 270, 34, 52, 126, 123, 6}, Y[] = {89, 0, 45, 4, 89, 8, 68, 90, 23, 15};
 // int x = 45, y = 90; // debugging
 
-
-void reset()
-{
-  mover.move_to(0, 0, FixedStepperDelay);
-}
-
 void setup() {
-  mover.init_pin_mode();
+  #ifndef USE_DMX
+  Serial.begin(9600);
+  #endif
 
-  pinMode(13, OUTPUT);
+  mover.init_pin_mode();
 }
 
 void loop() {
   mover.main_cycle();
+
+  // while (!Serial.available());
+  // String str = Serial.readStringUntil('\n');
+  // double pos = str.toDouble();
+
+  // mover.move_to(0, pos);
 }
 
 

@@ -41,6 +41,7 @@ StepperMotor:: StepperMotor(String name,
 
   STEPS_PER_DEGREE = GEAR_RATIO * (double) STEPS / OneRevolution;
   DEGREES_PER_STEP = OneRevolution / (GEAR_RATIO * (double) STEPS);
+  SPEED = 10; // default value
 
   CURR_POSITION = 0; // zero by default
 }
@@ -68,7 +69,7 @@ void StepperMotor:: turn(double deg_difference, bool dir, int delay = FixedStepp
   // compute the number of steps
   int increments = deg_to_step(unsigned_difference);
 
-  int delay_per_step = max(delay, MinStepperDelay); // calculate delay
+  int delay_per_step = FixedStepperDelay; // calculate delay
   // 500 microseconds is pretty much the limit; anything faster the motor doesn't pick up
 
   this->set_direction(dir);
@@ -91,22 +92,23 @@ void StepperMotor:: turn(double deg_difference, bool dir, int delay = FixedStepp
   // Serial.println(MOTOR_NAME + " at position " + CURR_POSITION); // debugging
 }
 
+// DEPRECATED. DO NOT USE
 // turns the motor to some absolute angular position
-void StepperMotor:: turn_to(double new_position, int delay = FixedStepperDelay){
-  if (new_position < 0){
-    // Serial.println("POSITION CANNOT BE NEGATIVE");
-    return ;
-  }
-  if (out_of_bounds(new_position)){
-    // Serial.println(this->get_name() + " POSITION OUT OF RANGE");
-    return ;
-  }
+// void StepperMotor:: turn_to(double new_position, int delay = FixedStepperDelay){
+//   if (new_position < 0){
+//     // Serial.println("POSITION CANNOT BE NEGATIVE");
+//     return ;
+//   }
+//   if (out_of_bounds(new_position)){
+//     // Serial.println(this->get_name() + " POSITION OUT OF RANGE");
+//     return ;
+//   }
 
-  double deg_difference = this->min_angle_difference(new_position);
-  bool direction = (deg_difference > 0 ? 1 : 0); // 1 is cw, 0 ccw
+//   double deg_difference = this->min_angle_difference(new_position);
+//   bool direction = (deg_difference > 0 ? 1 : 0); // 1 is cw, 0 ccw
 
-  this->turn(deg_difference, direction, delay);// turn motor
-}
+//   this->turn(deg_difference, direction, delay);// turn motor
+// }
 
 
 // make stepper turn by one step
@@ -141,7 +143,6 @@ bool StepperMotor:: out_of_bounds(double position){
   return position < LOWER_BOUND - BoundaryUC || position > UPPER_BOUND + BoundaryUC;
 }
 
-
 // converts the degree difference to number of steps
 int StepperMotor:: deg_to_step(double deg){
   return deg * STEPS_PER_DEGREE;
@@ -156,27 +157,34 @@ double StepperMotor:: step_to_deg(int inc){
   return (double) inc * DEGREES_PER_STEP;
 }
 
+// NOT USE. pan no longer supports 720 degree range; only 360
 // given a relative position within bounds, returns the angle and direction the stepper needs to turn, taking into consideration its absolute position.
 // positive is clockwise, negative is ccw
-double StepperMotor:: min_angle_difference(double position){
+// double StepperMotor:: min_angle_difference(double position){
 
-  double curr_relative_pos = CURR_POSITION; // calculate the current relative position
-  if (curr_relative_pos < 0) curr_relative_pos += OneRevolution;
-  // if (position < 0) position += OneRevolution;
+//   double curr_relative_pos = CURR_POSITION; // calculate the current relative position
+//   if (curr_relative_pos < 0) curr_relative_pos += OneRevolution;
+//   // if (position < 0) position += OneRevolution;
 
-  double new_position = position - curr_relative_pos; // effectively set current relative position to 0
-  if (new_position < 0) new_position += OneRevolution; 
+//   double new_position = position - curr_relative_pos; // effectively set current relative position to 0
+//   if (new_position < 0) new_position += OneRevolution; 
 
-  double ang_difference1 = new_position; // clockwise distance
-  double ang_difference2 = new_position - OneRevolution; // counter-clockwise
+//   double ang_difference1 = new_position; // clockwise distance
+//   double ang_difference2 = new_position - OneRevolution; // counter-clockwise
 
-  // assume that angdiff1 is always more optimal
-  if (abs(ang_difference1) > abs(ang_difference2)){
-    swap(ang_difference1, ang_difference2);
-  }
+//   // assume that angdiff1 is always more optimal
+//   if (abs(ang_difference1) > abs(ang_difference2)){
+//     swap(ang_difference1, ang_difference2);
+//   }
 
-  if (out_of_bounds(CURR_POSITION + ang_difference1)) return ang_difference2;
-  else return ang_difference1;
+//   if (out_of_bounds(CURR_POSITION + ang_difference1)) return ang_difference2;
+//   else return ang_difference1;
+// }
+
+// returns the angle and direction the stepper needs to turn
+// positive is clockwise, negative is ccw
+double StepperMotor:: get_angle_difference(double new_position){
+  return new_position - CURR_POSITION;
 }
 
 double StepperMotor:: get_position(){
@@ -208,9 +216,7 @@ void DualStepper:: init_pin_mode(){
 }
 
 // turns both steppers simultaneously, finishing at the same time
-void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int delay){
-  // ugly code; will optimise later
-  // basically StepperMotor:: turn(), but for two steppers instead
+void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2){
 
   double unsigned_difference1 = abs(deg1);
   double unsigned_difference2 = abs(deg2);
@@ -218,7 +224,7 @@ void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int dela
   int inc1 = stepper1.deg_to_step(unsigned_difference1);
   int inc2 = stepper2.deg_to_step(unsigned_difference2);
 
-  int delay_per_step = max(delay, MinStepperDelay); 
+  int delay_per_step = FixedStepperDelay;
 
   stepper1.set_direction(dir1);
   stepper2.set_direction(dir2);
@@ -268,7 +274,7 @@ void DualStepper:: turn(double deg1, double deg2, bool dir1, bool dir2, int dela
 }
 
 // turn both steppers simultaneously
-void DualStepper:: turn_to(double pos1, double pos2, int delay = FixedStepperDelay){
+void DualStepper:: turn_to(double pos1, double pos2){
   if (pos1 < 0 || pos2 < 0){
     // Serial.println("POSITION CANNOT BE NEGATIVE");
     return ;
@@ -283,14 +289,14 @@ void DualStepper:: turn_to(double pos1, double pos2, int delay = FixedStepperDel
   }
 
   // compute degree difference for first stepper
-  double deg_diff1 = stepper1.min_angle_difference(pos1);
+  double deg_diff1 = stepper1.get_angle_difference(pos1);
   bool dir1 = (deg_diff1 > 0 ? 1 : 0); 
 
   // for second stepper
-  double deg_diff2 = stepper2.min_angle_difference(pos2);
+  double deg_diff2 = stepper2.get_angle_difference(pos2);
   bool dir2 = (deg_diff2 > 0 ? 1 : 0);
 
-  this->turn(deg_diff1, deg_diff2, dir1, dir2, delay);
+  this->turn(deg_diff1, deg_diff2, dir1, dir2);
 }
 
 void DualStepper:: home(DualHallSensors& hallSensors){

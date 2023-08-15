@@ -32,7 +32,7 @@ class MovingHead{
         MovingHead() = default;
 
         void init_pin_mode();
-        void move_to(double pan_pos, double tilt_pos, int delay);
+        void move_to(double pan_pos, double tilt_pos);
         void find_home();
         void new_start_channel(int new_channel);
 

@@ -26,8 +26,8 @@ void MovingHead:: init_pin_mode(){
     #endif
 }
 
-void MovingHead:: move_to(double pan_pos, double tilt_pos, int delay){
-    panTilt.turn_to(pan_pos, tilt_pos, delay);
+void MovingHead:: move_to(double pan_pos, double tilt_pos){
+    panTilt.turn_to(pan_pos, tilt_pos);
 }
 
 void MovingHead:: find_home(){
@@ -54,7 +54,7 @@ void MovingHead:: main_cycle(){
     int panPos = map(read_dmx_channel(PAN_CHAN), 0, 255, PanInputLower, PanInputUpper);
     int tiltPos = map(read_dmx_channel(TILT_CHAN), 0, 255, TiltInputLower, TiltInputUpper);
 
-    move_to(panPos, tiltPos, MinStepperDelay);
+    move_to(panPos, tiltPos);
 }
 
 int MovingHead:: read_dmx_channel(int channel){
