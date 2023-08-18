@@ -16,18 +16,20 @@
 #define USING_ACCELSTEPPER
 
 // pan config
-const int PanSteps      = 200 * 8; // 8 microsteps, add MicroStep variable later
+const int PanMicroSteps  = 8;
+const int PanSteps      = 200 * PanMicroSteps;
 const int PanStepPin    = 4;
 const int PanDirPin     = 7;
 const int PanHallPin    = 0; 
 const double PanGR      = 144.0 / 17.0;
 const double PanUpper   = 359.0;
-const double PanLower   = 0;
+const double PanLower   = 0.0;
 
-const int PanMaxSpeed   = 800 * PanGR; // in steps per second
+const int PanMaxSpeed   = 300 * PanMicroSteps * PanGR; // in steps per second
 
 // tilt config
-const int TiltSteps     = 200 * 8; // 8 microsteps
+const int TiltMicroSteps = 8;
+const int TiltSteps     = 200 * TiltMicroSteps;
 const int TiltStepPin   = 3;
 const int TiltDirPin    = 6;
 const int TiltHallPin   = 2; // NOTE (2023-06-25): the only available interrupt pins on arduino uno are pins 2 and 3
@@ -35,12 +37,12 @@ const double TiltGR     = 64.0 / 21.0;
 const double TiltUpper  = 180;
 const double TiltLower  = 0.0;
 
-const int TiltMaxSpeed      = 800 * TiltGR; // in steps per second
+const int TiltMaxSpeed      = 300 * TiltMicroSteps * TiltGR; // in steps per second
 
 // general config
 const int StepperEnablePin  = 8; // enable pins for motor (cnc shield); must be at low
 const int MinStepperDelay   = 40; // minimum on 1/8 microsteping TMC2209
-const int FixedStepperDelay = 70;
+const int FixedStepperDelay = 500;
 const double OneRevolution = 360.0; // set to 2 for radian-based system
 const double BoundaryUC = 2.0; // boundary uncertainty of 2 degrees
 

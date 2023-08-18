@@ -46,6 +46,8 @@ void setup() {
   #endif
 
   mover.init_pin_mode();
+  mover.set_speed(PanMaxSpeed, TiltMaxSpeed);
+  mover.set_accel(2 * PanMaxSpeed, TiltMaxSpeed);
 }
 
 void loop() {

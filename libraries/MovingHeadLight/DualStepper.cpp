@@ -12,7 +12,6 @@
 #ifdef USING_ACCELSTEPPER
 
 DualStepper:: DualStepper(AccelStepper &s1, AccelStepper &s2) : stepper1(s1), stepper2(s2) {
-  this->set_max_speed();
   steppers.addStepper(stepper1);
   steppers.addStepper(stepper2);
 }
@@ -25,15 +24,15 @@ void DualStepper:: init_pin_mode(){
     digitalWrite(StepperEnablePin, LOW);
 }
 
-// turns both steppers to absolute position, finishing near the same time
-void DualStepper:: turn_to(double ang1, double ang2){
+// make both steppers take one step towards target position
+void DualStepper:: step_towards(double ang1, double ang2){
     
     // convert degrees to number of steps, taking into account motor gear ratio and (implicitly) microsteps
     target_positions[0] = (double) PanSteps * PanGR * ang1 / OneRevolution;
     target_positions[1] = (double) TiltSteps * TiltGR * ang2 / OneRevolution ;
 
     steppers.moveTo(target_positions);
-    steppers.runSpeedToPosition();
+    steppers.run();
 }
 
 // reset both steppers to their home position via hall effect sensor
@@ -41,9 +40,14 @@ void DualStepper:: home(DualHallSensors& hallSensors){
     // yet to be implemented in version 2
 }
 
-void DualStepper:: set_max_speed(){
-    stepper1.setMaxSpeed(PanMaxSpeed);
-    stepper2.setMaxSpeed(TiltMaxSpeed);
+void DualStepper:: set_max_speed(int speed1, int speed2){
+    stepper1.setMaxSpeed(speed1);
+    stepper2.setMaxSpeed(speed2);
+}
+
+void DualStepper:: set_acceleration(int accel1, int accel2){
+  stepper1.setAcceleration(accel1);
+  stepper2.setAcceleration(accel2);
 }
 
 

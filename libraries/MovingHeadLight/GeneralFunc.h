@@ -2,7 +2,7 @@
  * Created by: Victor Huang and Rohan Katreddy
  * June 23, 2023
  * 
- * 2023-06-25: removed ArduinoSTL due to serial.print/println usage conflict with DMXSerial; implemented swap() instead
+ * 2023-06-25: removed ArduinoSTL due to serial.print/println usage conflicting with DMXSerial; implemented swap() instead
  */
 
 #ifndef GeneralFunc_h

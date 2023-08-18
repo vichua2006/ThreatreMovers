@@ -26,8 +26,8 @@ void MovingHead:: init_pin_mode(){
     #endif
 }
 
-void MovingHead:: move_to(double pan_pos, double tilt_pos){
-    panTilt.turn_to(pan_pos, tilt_pos);
+void MovingHead:: move_towards(double pan_pos, double tilt_pos){
+    panTilt.step_towards(pan_pos, tilt_pos);
 }
 
 void MovingHead:: find_home(){
@@ -47,6 +47,21 @@ void MovingHead:: new_start_channel(int new_channel){
     TILT_CHAN = new_channel + RelativeTiltChan;
 }
 
+
+/// @brief set the maximum speeds that pan/tilt will accelerate to during movement, in steps per second
+/// @param pan_speed max speed of pan, 
+/// @param tilt_speed max speed of tilt
+void MovingHead:: set_speed(int pan_speed, int tilt_speed){
+    panTilt.set_max_speed(pan_speed, tilt_speed);
+}
+
+/// @brief Set the rate of acceleration of pan and tilt stepper motors, in steps per second per second. Rate must be > 0.0. Don't call more often than neccesary.
+/// @param pan_accel acceleration of pan
+/// @param tilt_accel acceleration of tilt
+void MovingHead:: set_accel(int pan_accel, int tilt_accel){
+    panTilt.set_acceleration(pan_accel, tilt_accel);
+}
+
 #ifdef USING_DMX
 
 void MovingHead:: main_cycle(){
@@ -54,7 +69,7 @@ void MovingHead:: main_cycle(){
     int panPos = map(read_dmx_channel(PAN_CHAN), 0, 255, PanInputLower, PanInputUpper);
     int tiltPos = map(read_dmx_channel(TILT_CHAN), 0, 255, TiltInputLower, TiltInputUpper);
 
-    this->move_to(panPos, tiltPos);
+    this->move_towards(panPos, tiltPos);
 }
 
 int MovingHead:: read_dmx_channel(int channel){

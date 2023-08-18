@@ -32,9 +32,11 @@ class MovingHead{
         MovingHead() = default;
 
         void init_pin_mode();
-        void move_to(double pan_pos, double tilt_pos);
+        void move_towards(double pan_pos, double tilt_pos);
         void find_home();
         void new_start_channel(int new_channel);
+        void set_speed(int pan_speed, int tilt_speed);
+        void set_accel(int pan_accel, int tilt_accel);
 
         #ifdef USING_DMX
         void main_cycle();

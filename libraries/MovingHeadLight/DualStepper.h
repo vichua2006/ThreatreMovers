@@ -33,9 +33,10 @@ class DualStepper {
     DualStepper() = default;
 
     void init_pin_mode();
-    void turn_to(double ang1, double ang2);
+    void step_towards(double ang1, double ang2);
     void home(DualHallSensors& hallSensors);
-    void set_max_speed();
+    void set_max_speed(int speed1, int speed2);
+    void set_acceleration(int accel1, int accel2);
 };
 
 #endif
