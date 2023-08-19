@@ -13,7 +13,6 @@
  * PAN TILT CONFIG *
  **************/
 
-#define USING_ACCELSTEPPER
 
 // pan config
 const int PanMicroSteps  = 8;
@@ -25,7 +24,7 @@ const double PanGR      = 144.0 / 17.0;
 const double PanUpper   = 359.0;
 const double PanLower   = 0.0;
 
-const int PanMaxSpeed   = 300 * PanMicroSteps * PanGR; // in steps per second
+const int PanMaxSpeed   = 200 * PanMicroSteps * PanGR; // in steps per second
 
 // tilt config
 const int TiltMicroSteps = 8;
@@ -37,7 +36,7 @@ const double TiltGR     = 64.0 / 21.0;
 const double TiltUpper  = 180;
 const double TiltLower  = 0.0;
 
-const int TiltMaxSpeed      = 300 * TiltMicroSteps * TiltGR; // in steps per second
+const int TiltMaxSpeed      = 400 * TiltMicroSteps * TiltGR; // in steps per second
 
 // general config
 const int StepperEnablePin  = 8; // enable pins for motor (cnc shield); must be at low

@@ -14,7 +14,7 @@
 
 MovingHead:: MovingHead(DualStepper &steppers, DualHallSensors &sensors, int start_chan) : panTilt(steppers), panTiltHallSensor(sensors){
     // reference members must be already initalized
-    this->new_start_channel(start_chan);
+    this->new_starting_address(start_chan);
 }
 
 void MovingHead:: init_pin_mode(){
@@ -34,17 +34,19 @@ void MovingHead:: find_home(){
     panTilt.home(panTiltHallSensor);
 }
 
-void MovingHead:: new_start_channel(int new_channel){
+/// @brief update the starting dmx channel/address
+/// @param address the new starting address
+void MovingHead:: new_starting_address(int address){
 
-    START_CHANNEL = new_channel;
+    START_CHANNEL = address;
 
     // update all other channel positions
-    MASTER_DIMMER = new_channel + RelativeMasterDimmer;
-    RED_CHAN = new_channel + RelativeRedChan;
-    GREEN_CHAN = new_channel + RelativeGreenChan;
-    BLUE_CHAN = new_channel + RelativeBlueChan;
-    PAN_CHAN = new_channel + RelativePanChan;
-    TILT_CHAN = new_channel + RelativeTiltChan;
+    MASTER_DIMMER = address + RelativeMasterDimmer;
+    RED_CHAN = address + RelativeRedChan;
+    GREEN_CHAN = address + RelativeGreenChan;
+    BLUE_CHAN = address + RelativeBlueChan;
+    PAN_CHAN = address + RelativePanChan;
+    TILT_CHAN = address + RelativeTiltChan;
 }
 
 
@@ -66,10 +68,18 @@ void MovingHead:: set_accel(int pan_accel, int tilt_accel){
 
 void MovingHead:: main_cycle(){
 
-    int panPos = map(read_dmx_channel(PAN_CHAN), 0, 255, PanInputLower, PanInputUpper);
-    int tiltPos = map(read_dmx_channel(TILT_CHAN), 0, 255, TiltInputLower, TiltInputUpper);
+    // if the last packet of dmx data was more than 5 seconds ago 
+    if (DMXSerial.noDataSince() < (unsigned long) 5000){
+        // int panPos = map(read_dmx_channel(PAN_CHAN), 0, 255, PanInputLower, PanInputUpper);
+        // int tiltPos = map(read_dmx_channel(TILT_CHAN), 0, 255, TiltInputLower, TiltInputUpper);
 
-    this->move_towards(panPos, tiltPos);
+        int panPos = (double) read_dmx_channel(PAN_CHAN) / 255.0 * PanInputUpper;
+        int tiltPos = (double) read_dmx_channel(TILT_CHAN) / 255.0 * TiltInputUpper;
+
+        this->move_towards(panPos, tiltPos);
+    } else {
+        this->move_towards(0, 0);
+    }
 }
 
 int MovingHead:: read_dmx_channel(int channel){

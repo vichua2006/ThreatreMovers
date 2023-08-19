@@ -9,25 +9,9 @@
 #include <DMXSerial.h>
 #endif
 
-#ifdef USING_ACCELSTEPPER
 
 AccelStepper pan(AccelStepper:: DRIVER, PanStepPin, PanDirPin);
 AccelStepper tilt(AccelStepper:: DRIVER, TiltStepPin, TiltDirPin);
-
-#endif
-
-#ifndef USING_ACCELSTEPPER
-
-// create class instances and build mover object
-StepperPins PanPins(PanStepPin, PanDirPin, PanHallPin, StepperEnablePin);
-StepperProperty PanProp(PanSteps, PanGR, PanUpper, PanLower);
-StepperMotor pan("Pan stepper", PanPins, PanProp);
-
-StepperPins TiltPins(TiltStepPin, TiltDirPin, TiltHallPin, StepperEnablePin);
-StepperProperty TiltProp(TiltSteps, TiltGR, TiltUpper, TiltLower);
-StepperMotor tilt("Tilt stepper", TiltPins, TiltProp);
-
-#endif
 
 
 DualStepper pan_tilt(pan, tilt);
@@ -47,11 +31,14 @@ void setup() {
 
   mover.init_pin_mode();
   mover.set_speed(PanMaxSpeed, TiltMaxSpeed);
-  mover.set_accel(2 * PanMaxSpeed, TiltMaxSpeed);
+  mover.set_accel(2 * PanMaxSpeed, 2 * TiltMaxSpeed);
+  
 }
 
 void loop() {
   mover.main_cycle();
+
+  // pan_tilt.step_towards(90, 90);
 
   // while (!Serial.available());
   // String str = Serial.readStringUntil('\n');

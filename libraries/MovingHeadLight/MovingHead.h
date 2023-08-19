@@ -28,13 +28,13 @@ class MovingHead{
         int TILT_CHAN;
 
     public:
-        MovingHead(DualStepper &steppers, DualHallSensors &sensors, int start_channel);
+        MovingHead(DualStepper &steppers, DualHallSensors &sensors, int starting_address);
         MovingHead() = default;
 
         void init_pin_mode();
         void move_towards(double pan_pos, double tilt_pos);
         void find_home();
-        void new_start_channel(int new_channel);
+        void new_starting_address(int address);
         void set_speed(int pan_speed, int tilt_speed);
         void set_accel(int pan_accel, int tilt_accel);
 

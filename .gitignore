@@ -8,3 +8,6 @@
 
 # ignore arduino test file
 test/
+
+# ignore MS excel spreadsheets
+*.xlsx
