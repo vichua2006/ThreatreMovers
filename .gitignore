@@ -9,5 +9,5 @@
 # ignore arduino test file
 test/
 
-# ignore MS excel spreadsheets
-*.xlsx
+# ignroe finances folder
+finances/
