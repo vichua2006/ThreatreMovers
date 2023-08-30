@@ -1,3 +1,6 @@
+NOTE: D+, D- for DMX, not XLR. 3 is D+, 2 is D-
+
+connections:
 (rs485) B to D- (DMX shield)
 (rs485) A to D+ (DMX shield)
 (rs485) DE, GND to GND (DMX shield)
