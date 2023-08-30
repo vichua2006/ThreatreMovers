@@ -1,50 +1,54 @@
+#include <Arduino.h>
 #include <AccelStepper.h>
-#include "MovingHead.h"
-#include "GeneralFunc.h"
-#include <config.h>
+#include <DmxInput.h>
+#include <PicoConfig.h>
+#include <PicoMover.h>
+
+#define LEDPIN 25
+#define START_CHANNEL 1
+#define NUM_CHANNELS 6
 
 
-// to avoid conflict with serial in/out
-#ifdef USING_DMX
-#include <DMXSerial.h>
-#endif
+AccelStepper pan(AccelStepper::DRIVER, PanStepPin, PanDirPin);
+AccelStepper tilt(AccelStepper::DRIVER, TiltStepPin, TiltDirPin);
+Mover mover;
+
+AccelStepper* s[2];
+
+const double tilt_adj = (double) TiltSteps / 2.0 * TiltGR / 255.0;
+const double pan_adj = (double) PanSteps * PanGR / 255.0;
+
+DmxInput dmx_input;
+volatile uint8_t buffer[DMXINPUT_BUFFER_SIZE(START_CHANNEL, NUM_CHANNELS)];
 
 
-AccelStepper pan(AccelStepper:: DRIVER, PanStepPin, PanDirPin);
-AccelStepper tilt(AccelStepper:: DRIVER, TiltStepPin, TiltDirPin);
+void setup(){
+    
+    // set enable pin for stepper drivers; must be at low
+    pinMode(LEDPIN, OUTPUT);
+    pinMode(StepperEnablePin, OUTPUT);
+    digitalWrite(StepperEnablePin, LOW);
 
+    // control pin controls I/O mode of rs485 module; must be set to low for input;
+    pinMode(DMXControlPin, OUTPUT);
+    digitalWrite(DMXControlPin, LOW);
 
-DualStepper pan_tilt(pan, tilt);
+    // the receive doesn't have to be a rx pin
+    dmx_input.begin(DMXReceiverPin, START_CHANNEL, NUM_CHANNELS);
+    dmx_input.read_async(buffer);
 
-HallSensor pan_sensor(PanHallPin), tilt_sensor(TiltHallPin);
-DualHallSensors pan_tilt_sensors(pan_sensor, tilt_sensor);
+    // add steppers and set speed and acceleration
+    mover.add_steppers(pan, tilt);
+    mover.set_max_speed(PanMaxSpeed, TiltMaxSpeed);
+    mover.set_accel(AccelFactor * PanMaxSpeed, AccelFactor * TiltMaxSpeed);
 
-MovingHead mover(pan_tilt, pan_tilt_sensors, DefaultStartChannel);
-
-// double X[] = {32, 128, 0, 333, 270, 34, 52, 126, 123, 6}, Y[] = {89, 0, 45, 4, 89, 8, 68, 90, 23, 15};
-// int x = 45, y = 90; // debugging
-
-void setup() {
-  #ifndef USING_DMX
-  Serial.begin(9600);
-  #endif
-
-  mover.init_pin_mode();
-  mover.set_speed(PanMaxSpeed, TiltMaxSpeed);
-  mover.set_accel(2 * PanMaxSpeed, 2 * TiltMaxSpeed);
-  
 }
 
-void loop() {
-  mover.main_cycle();
-
-  // pan_tilt.step_towards(90, 90);
-
-  // while (!Serial.available());
-  // String str = Serial.readStringUntil('\n');
-  // double pos = str.toDouble();
-
-  // mover.move_to(0, pos);
+void loop(){
+    Serial.println(1);
+    mover.coordinate(1000, 9000);
+    mover.run_towards();
+    // tilt.moveTo(1000);
 }
 
 
