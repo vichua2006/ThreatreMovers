@@ -14,8 +14,8 @@
 // pan config
 const int PanMicroSteps  = 8;
 const int PanSteps      = 200 * PanMicroSteps;
-const int PanStepPin    = 2;
-const int PanDirPin     = 3;
+const int PanStepPin    = 3;
+const int PanDirPin     = 2;
 const double PanGR      = 144.0 / 17.0;
 const double PanUpper   = 359.0;
 const double PanLower   = 0.0;
@@ -25,8 +25,8 @@ const int PanMaxSpeed   = 100 * PanMicroSteps * PanGR; // in steps per second
 // tilt config
 const int TiltMicroSteps = 8;
 const int TiltSteps     = 200 * TiltMicroSteps;
-const int TiltStepPin   = 6;
-const int TiltDirPin    = 7;
+const int TiltStepPin   = 7;
+const int TiltDirPin    = 6;
 const double TiltGR     = 64.0 / 21.0;
 const double TiltUpper  = 180;
 const double TiltLower  = 0.0;
