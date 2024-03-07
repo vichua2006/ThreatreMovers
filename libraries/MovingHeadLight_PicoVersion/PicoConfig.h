@@ -30,6 +30,7 @@ const int TiltDirPin    = 7;
 const double TiltGR     = 64.0 / 21.0;
 const double TiltUpper  = 180;
 const double TiltLower  = 0.0;
+const int TiltDriverPDN = 9;
 
 const int TiltMaxSpeed      = 400 * TiltMicroSteps * TiltGR; // in steps per second
 

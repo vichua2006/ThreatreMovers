@@ -13,8 +13,6 @@ AccelStepper pan(AccelStepper::DRIVER, PanStepPin, PanDirPin);
 AccelStepper tilt(AccelStepper::DRIVER, TiltStepPin, TiltDirPin);
 Mover mover;
 
-AccelStepper* s[2];
-
 const double tilt_adj = (double) TiltSteps / 2.0 * TiltGR / 255.0;
 const double pan_adj = (double) PanSteps * PanGR / 255.0;
 
@@ -23,6 +21,7 @@ volatile uint8_t buffer[DMXINPUT_BUFFER_SIZE(START_CHANNEL, NUM_CHANNELS)];
 
 
 void setup(){
+    Serial.begin(9600);
     
     // set enable pin for stepper drivers; must be at low
     pinMode(LEDPIN, OUTPUT);
@@ -33,10 +32,6 @@ void setup(){
     pinMode(DMXControlPin, OUTPUT);
     digitalWrite(DMXControlPin, LOW);
 
-    // the receive doesn't have to be a rx pin
-    dmx_input.begin(DMXReceiverPin, START_CHANNEL, NUM_CHANNELS);
-    dmx_input.read_async(buffer);
-
     // add steppers and set speed and acceleration
     mover.add_steppers(pan, tilt);
     mover.set_max_speed(PanMaxSpeed, TiltMaxSpeed);
@@ -45,10 +40,19 @@ void setup(){
 }
 
 void loop(){
-    Serial.println(1);
-    mover.coordinate(1000, 9000);
+    // mover.coordinate(buffer[5] * pan_adj, buffer[6] * tilt_adj);
+    mover.coordinate(0, 500);
     mover.run_towards();
     // tilt.moveTo(1000);
+
+    Serial.println(buffer[5]);
+}
+
+void setup1(){
+    // the receive doesn't have to be a rx pin
+    dmx_input.begin(DMXReceiverPin, START_CHANNEL, NUM_CHANNELS);
+    dmx_input.read_async(buffer);
+
 }
 
 
