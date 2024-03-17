@@ -42,14 +42,15 @@ void setup(){
 void loop(){
     // mover.coordinate(buffer[5] * pan_adj, buffer[6] * tilt_adj);
     mover.coordinate(0, 500);
-    mover.run_towards();
+    while(mover.run_towards());
+    mover.coordinate(0, 0);
+    while(mover.run_towards());
     // tilt.moveTo(1000);
 
-    Serial.println(buffer[5]);
+    // Serial.println(buffer[5]);
 }
 
 void setup1(){
-    // the receive doesn't have to be a rx pin
     dmx_input.begin(DMXReceiverPin, START_CHANNEL, NUM_CHANNELS);
     dmx_input.read_async(buffer);
 
