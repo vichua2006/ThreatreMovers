@@ -36,15 +36,16 @@ void setup(){
     mover.add_steppers(pan, tilt);
     mover.set_max_speed(PanMaxSpeed, TiltMaxSpeed);
     mover.set_accel(AccelFactor * PanMaxSpeed, AccelFactor * TiltMaxSpeed);
+ 
 
 }
 
 void loop(){
-    // mover.coordinate(buffer[5] * pan_adj, buffer[6] * tilt_adj);
-    mover.coordinate(0, 500);
-    while(mover.run_towards());
-    mover.coordinate(0, 0);
-    while(mover.run_towards());
+    mover.coordinate(buffer[5] * pan_adj, buffer[6] * tilt_adj);
+    // mover.coordinate(0, 500);
+    // while(mover.run_towards());
+    // mover.coordinate(0, 0);
+    // while(mover.run_towards());
     // tilt.moveTo(1000);
 
     // Serial.println(buffer[5]);
@@ -57,3 +58,6 @@ void setup1(){
 }
 
 
+void loop1(){
+    mover.run_towards();
+}

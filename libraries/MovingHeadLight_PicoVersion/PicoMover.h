@@ -35,7 +35,7 @@ class Mover{
         /// @param accel2 acceleration of stepper 2
         void set_accel(int accel1, int accel2);
 
-        /// @brief Adjust the speed of steppers to ensure that both arrive at give positions near the same time. 
+        /// @brief Set the target position. Adjusts the speed of steppers to ensure that both arrive at give positions near the same time. 
         /// @param pos1 target position of stepper 1
         /// @param pos2 target position of stepper 2
         void coordinate(int pos1, int pos2);
