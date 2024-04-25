@@ -38,8 +38,13 @@ void Mover::coordinate(int pos1, int pos2){
 
     // set new speed for each stepper
     for (int i=0;i<2;i++){
-        // math isn't exactly right; t_accel isn't necessarily the same
+        // wrong math, t_accel isn't really constant; close enough
         _steppers[i]->setMaxSpeed((double) _steppers[i]->distanceToGo() / (t_max - t_accel));
+
+        // right math; too slow
+        // double a = _max_speeds[i] * AccelFactor;
+        // double d = _steppers[i]->distanceToGo();
+        // _steppers[i]->setMaxSpeed(((a * t_max) - sqrt(a * a * t_max * t_max - 4 * a * d)) / 2);
     }
 }
 
