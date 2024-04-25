@@ -48,7 +48,7 @@ void loop(){
     // while(mover.run_towards());
     // tilt.moveTo(1000);
 
-    // Serial.println(buffer[5]);
+    
 }
 
 void setup1(){

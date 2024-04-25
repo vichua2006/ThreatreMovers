@@ -32,7 +32,7 @@ void Mover::coordinate(int pos1, int pos2){
     double t_accel = 1.0 / AccelFactor; // amount of time it takes to accel to _max_speeds[i]
     for (int i=0;i<2;i++){
         // compute the time it takes for stepper to travel entire distance at absolute top speed
-        double t_total = ((double) _steppers[i]->distanceToGo() / (double) _max_speeds[i]) + t_accel;
+        double t_total = abs((double) _steppers[i]->distanceToGo() / (double) _max_speeds[i]) + t_accel;
         t_max = max(t_max, t_total);
     }
 
