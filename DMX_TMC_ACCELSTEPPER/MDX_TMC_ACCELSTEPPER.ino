@@ -2,10 +2,11 @@
 #include "DmxInput.h"
 #include <AccelStepper.h>
 #include <TMC2209.h>
+#include <PicoConfig.h>
 
 
 DmxInput dmxInput;
-AccelStepper tilt(1, 4,3);
+AccelStepper tilt(AccelStepper::DRIVER, TiltStepPin, TiltDirPin);
 
 #define START_CHANNEL 1
 #define NUM_CHANNELS 7

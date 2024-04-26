@@ -6,7 +6,7 @@
 // See this reference for more details:
 // https://www.arduino.cc/reference/en/language/functions/communication/serial/
 
-HardwareSerial & serial_stream = Serial3;
+HardwareSerial & serial_stream = Serial2;
 
 const long SERIAL_BAUD_RATE = 115200;
 const int DELAY = 3000;
@@ -17,6 +17,8 @@ TMC2209 stepper_driver;
 
 void setup()
 {
+    Serial2.setTX(8);
+  Serial2.setRX(9);
   Serial.begin(SERIAL_BAUD_RATE);
 
   stepper_driver.setup(serial_stream);
